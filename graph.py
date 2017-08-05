@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-import copy
 import random
 
 
@@ -49,13 +48,21 @@ class Graph(object):
         self.VERTEXNUM = len(self.graph)
     # TODO readFromMETIS
     
-    def random(self,vertexNum=None,edgeGamma=0.5,valuefun = lambda x:1):
+    def random(self,vertexNum=None,edgeGamma=0.5,undirected=True,valuefun = lambda x:1):
         vertexNum = vertexNum if vertexNum else self.VERTEXNUM
-        self._graph = np.random.random([vertexNum,vertexNum])
-        self.VERTEXNUM = vertexNum
-        self._graph[np.where(self._graph<edgeGamma)] = 0
-        self._graph[np.where(self._graph>=edgeGamma)] = valuefun(len(np.where(self._graph>=edgeGamma)[0]))
-        
+        if not undirected:
+            self._graph = np.random.random([vertexNum,vertexNum])
+            self.VERTEXNUM = vertexNum
+            self._graph[np.where(self._graph<edgeGamma)] = 0
+            self._graph[np.where(self._graph>=edgeGamma)] = valuefun(len(np.where(self._graph>=edgeGamma)[0]))
+        else:
+            self._graph = np.zeros([vertexNum,vertexNum])
+            for H in range(1,vertexNum):
+                for L in range(H):
+                    self._graph[H,L] = valuefun(1) if random.random()>=edgeGamma else 0
+            for H in range(vertexNum-1):
+                for L in range(H+1,vertexNum):
+                    self._graph[H,L] = self._graph[L,H]
         
     @property
     def graph(self):
@@ -140,7 +147,7 @@ class GraphEnv(Graph):
 
 
    
-a = GraphEnv(5,2,100)
+a = GraphEnv(8,4,100)
 a.random(valuefun = np.random.random)
 a.reset()
 for i in range(10):
