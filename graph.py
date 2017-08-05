@@ -3,7 +3,7 @@ import numpy as np
 import random
 
 
-DEBUG = True
+
 
 class Graph(object):
     def __init__(self,VertexNum = 0,maxVertex=100,enableValue=True):
@@ -64,7 +64,15 @@ class Graph(object):
             for H in range(vertexNum-1):
                 for L in range(H+1,vertexNum):
                     self._graph[H,L] = self._graph[L,H]
-        
+    
+    @property
+    def edge(self):
+        result = []
+        for H in range(self.VERTEXNUM):
+            for L in range(self.VERTEXNUM):
+                result.append((H,L,self.graph[H,L]))
+        return result
+    
     @property
     def graph(self):
         return self._graph
@@ -79,7 +87,6 @@ class Graph(object):
 
 
 class GraphEnv(Graph):
-    global DEBUG
     def __init__(self,VertexNum,selectVerNum,maxVertex=100):
         super(GraphEnv,self).__init__(VertexNum,maxVertex)      
         if selectVerNum>=VertexNum:
@@ -87,6 +94,7 @@ class GraphEnv(Graph):
         self.SELECTVECNUM = selectVerNum
         self.initMaxValue()
         self.reset()
+        self.REWARDRUNTIMES = 2000
         
     @property
     def inputSize(self):# 输入action大小
@@ -127,8 +135,7 @@ class GraphEnv(Graph):
         assert self.graph[inSelect,inSelect] == 0
         self.graph[outSelect,outSelect] = 0
         self.graph[inSelect,inSelect] = 1
-        
-        reward_pre = self.reward_pre()
+        reward_pre = self.reward_pre(self.REWARDRUNTIMES)
         done = self.done(reward_pre)
         return self.state,reward_pre,done
     
@@ -137,33 +144,29 @@ class GraphEnv(Graph):
         return self.out()
 
     def done(self,reward_pre):# TODO 如果运行结果比其他算法的最优解好，则done
-        pass
+        return False
+    
     def initMaxValue(self):# TODO 调用其他的已知算法，求得大约的最优解
         pass
-    def reward_pre(self):# TODO 检测这个状态的覆盖率
-        pass
+    
+    def reward_pre(self,n=2000):# TODO 算法准确率太低,尝试寻找新的算法解决
+        result = 0
+        for i in range(n):
+            selectVer = self.selectVertex.reshape([self.VERTEXNUM,1])
+            tempgraph = self.graph >= np.random.random([self.VERTEXNUM,self.VERTEXNUM])
+            succeedver = np.sum((selectVer*tempgraph).astype('bool'),0).astype('bool')
+            result += np.sum(succeedver)
+        return result/n
 
 
 
 
 
    
-a = GraphEnv(8,4,100)
+a = GraphEnv(5,3,100)
 a.random(valuefun = np.random.random)
 a.reset()
 for i in range(10):
-    state = a.act(np.random.random(200))
-    print('{}:    {}    a==1 len:{}'.format(i,a.selectVertex,len(np.where(a.selectVertex==1)[0])))
-
-
-
-
-
-
-
-
-
-
-
-
+    state,reward_pre,done = a.act(np.random.random(200))
+    print('{}:    {}    reward1={}    reward2={}'.format(i,a.selectVertex,reward_pre,a.reward_pre()))
 
