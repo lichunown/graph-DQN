@@ -1,3 +1,26 @@
+## info
+
+### code
+
+
+#### DQN.py
+
+##### class: DQN
+
+
+#### graph.py
+
+##### class: Graph
+
+##### class: GraphEnv
+
+
+#### randomgraph.py
+
+copy from: https://github.com/j2kun/erdos-renyi
+
+**marked but not use in this project**
+
 ### 重难点：
 
 - (struct2vec)

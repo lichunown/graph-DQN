@@ -46,6 +46,7 @@ class Graph(object):
     def load(self,filename):
         self._graph = np.load(filename+'.npy')
         self.VERTEXNUM = len(self.graph)
+        
     # TODO readFromMETIS
     
     def random(self,vertexNum=None,edgeGamma=0.5,undirected=True,valuefun = lambda x:1):
