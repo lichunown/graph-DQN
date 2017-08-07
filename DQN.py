@@ -15,7 +15,7 @@ from keras.optimizers import Adam
 import os
 from keras.models import load_model
 from keras import backend as K
-from .graph import GraphEnv
+from graph import GraphEnv
 
 #agent = DQN(env)
 #agent.load()
@@ -50,16 +50,13 @@ class DQN(object):
         self.epsilon_decay = 0.995
         self.learning_rate = 0.001
         self.train_batch = 32
-        self._model = self._createModel()
+        self._inmodel = self._createModel()
+        self._outmodel = self._createModel()
         
     @property
     def model(self):
         return self._model
     
-    def _huber_loss(self, target, prediction):
-        # sqrt(1+error^2)-1
-        error = prediction - target
-        return K.mean(K.sqrt(1+K.square(error))-1, axis=-1)
     '''
     def createLSTMModel(self):# 定义训练模型
         qenc = Sequential()
@@ -83,36 +80,47 @@ class DQN(object):
         return _model    
     '''
     def _createModel(self,dd=True): # TODO models
-        gmodel = Sequential()
-        gmodel.add(Embedding(input_dim = self.input_size, output_dim= 20))
-        gmodel.add(Dense(self.output_size, activation="softmax"))
-        gmodel.compile(optimizer="adam", loss='categorical_crossentropy',metrics=["accuracy"])
-        return gmodel
+        model = Sequential()
+        model.add(Conv1D(self.train_batch//2 , 5,border_mode="valid",input_shape=self.input_size))
+        model.add(Flatten())
+        model.add(Dense(self.output_size//2, activation="relu"))
+        model.compile(optimizer="adam", loss='categorical_crossentropy',metrics=["accuracy"])
+        return model
         
     def train(self):
         if len(self.memory)>=self.train_batch:
             minibatch = random.sample(self.memory,self.train_batch) 
-            state_batch = np.zeros([self.train_batch,self.state_size])
-            target_batch = np.zeros([self.train_batch,self.action_size]) 
-            for i,(state, action, reward, next_state, done) in enumerate(minibatch):
-                state_batch[i,:] = state
-                target_batch[i,:] = self.predict_action(state)
-                target_batch[i,action] = reward if done else reward+self.gamma*np.amax(self.predict_action(next_state)[0])
-            self.model.fit(state_batch, target_batch, epochs=1, verbose=0)
+            state_batch = np.zeros([self.train_batch,self.input_size[0],self.input_size[1]])
+            target_out_batch = np.zeros([self.train_batch,self.output_size//2]) 
+            target_in_batch = np.zeros([self.train_batch,self.output_size//2]) 
+            for i,(state, action, reward, next_state, done,info) in enumerate(minibatch):
+                state_batch[i,:,:] = state
+                action_out_num =  np.argmax(self.predict_action_out(state)[0]*info[0])
+                action_in_num = np.argmax(self.predict_action_in(state)[0]*info[1])
+                target_out_batch[i,action_out_num] = reward if done else reward+self.gamma*np.amax(self.predict_action_out(next_state)[0]*info[0])
+                target_in_batch[i,action_in_num] = reward if done else reward+self.gamma*np.amax(self.predict_action_out(next_state)[0]*info[1])
+            self._outmodel.fit(state_batch, target_out_batch, epochs=1, verbose=0)
+            self._inmodel.fit(state_batch, target_in_batch, epochs=1, verbose=0)
             if self.epsilon > self.epsilon_min:
                 self.epsilon *= self.epsilon_decay
             
-    def predict_action(self,state):# 预测动作
-        return self.model.predict(state)
+
+    def predict_action_out(self,state):# 预测动作
+        return self._outmodel.predict(state)
+    def predict_action_in(self,state):# 预测动作
+        return self._inmodel.predict(state)
+    def predict_action(self,state):
+        return np.concatenate([self.predict_action_out(state),self.predict_action_in(state)],1)
+    
     def act(self,state):# 执行的动作，具有随机性
         if random.random() < self.epsilon:
-            return random.randrange(self.action_size)
+            return np.random.random(self.output_size)
         else:
             #print(self.predict_action(state))
-            return np.argmax(self.predict_action(state)[0])
+            return self.predict_action(state)[0]
         
-    def remember(self,state,action,reward,next_state,done):
-        self.memory.append((state,action,reward,next_state,done))
+    def remember(self,state,action,reward,next_state,done,info):
+        self.memory.append((state,action,reward,next_state,done,info))
         #self._train()
     def save(self,name = 'models/test'):
         self.model.save(name)
@@ -128,7 +136,7 @@ class DQN(object):
 
 MAXVERTEXNUM = 100
 
-env = GraphEnv(20,5,MAXVERTEXNUM)
+env = GraphEnv(50,5,MAXVERTEXNUM)
 env.random(valuefun = np.random.random)
 
 agent = DQN(MAXVERTEXNUM)
@@ -136,19 +144,29 @@ agent = DQN(MAXVERTEXNUM)
 EPISODES = 1000
 MAXTIMES = 5000
 epochs = 32
+
+i = 0
+
 for e in range(EPISODES):
     state = env.reset()
+    state = state.reshape([1,MAXVERTEXNUM,MAXVERTEXNUM])
+    lastreward = 0
     for times in range(MAXTIMES):
         action = agent.act(state)
-        next_state,reward_pre,done = env.act(action)
-        reward = reward_pre# TODO change reward
-        agent.remember(state,action,reward,next_state,done)
+        action.reshape([1,2*MAXVERTEXNUM])
+        next_state,reward_pre,done,info = env.act(action)
+        next_state = next_state.reshape([1,MAXVERTEXNUM,MAXVERTEXNUM])
+        reward = 0.1 if reward_pre>=lastreward else -10# TODO change reward
+        lastreward = reward_pre
+        agent.remember(state,action,reward,next_state,done,info)
         state = next_state
+        i += 1
         if done:
-            print('[times]:{}/{}\t\t[i]:{}\t[reward]:{}\t[epsilon]:{}'.format(e,EPISODES,times,reward,agent.epsilon))
+            print('[times]:{}/{}\t\t[i]:{}\t[reward]:{}\t[epsilon]:{}'.format(e,EPISODES,times,reward_pre,agent.epsilon))
             break
-        if times % epochs==0:
+        if i % epochs==0:
             agent.train()
+            print('{}|[times]:{}/{}\t\t[i]:{}\t[reward]:{}\t[epsilon]:{}'.format(i,e,EPISODES,times,reward_pre,agent.epsilon))
         
 
 

@@ -137,7 +137,7 @@ class GraphEnv(Graph):
         self.graph[inSelect,inSelect] = 1
         reward_pre = self.reward_pre(self.REWARDRUNTIMES)
         done = self.done(reward_pre)
-        return self.state,reward_pre,done
+        return self.state,reward_pre,done,(self._selectVertexOut(),self._selectVertexOut_change())
     
     @property
     def state(self):
@@ -163,10 +163,10 @@ class GraphEnv(Graph):
 
 
    
-a = GraphEnv(5,3,100)
-a.random(valuefun = np.random.random)
-a.reset()
-for i in range(10):
-    state,reward_pre,done = a.act(np.random.random(200))
-    print('{}:    {}    reward1={}    reward2={}'.format(i,a.selectVertex,reward_pre,a.reward_pre()))
+#a = GraphEnv(5,3,100)
+#a.random(valuefun = np.random.random)
+#a.reset()
+#for i in range(10):
+#    state,reward_pre,done,info = a.act(np.random.random(200))
+#    print('{}:    {}    reward1={}    reward2={}'.format(i,a.selectVertex,reward_pre,a.reward_pre()))
 
