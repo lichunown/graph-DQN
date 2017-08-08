@@ -94,7 +94,7 @@ class GraphEnv(Graph):
         self.SELECTVECNUM = selectVerNum
         self.initMaxValue()
         self.reset()
-        self.REWARDRUNTIMES = 2000
+        self.REWARDRUNTIMES = 1000
         
     @property
     def inputSize(self):# 输入action大小
@@ -110,11 +110,13 @@ class GraphEnv(Graph):
     def _selectVertexOut(self):# 为处理神经网络数据产生的
         result = np.zeros(self.MAXVERTEX)
         result[list(range(self.VERTEXNUM))] = self.selectVertex
+        #result[np.where(result==0)]=-9999
         return result
     
     def _selectVertexOut_change(self):# 同上，只是在已存在点求了次补
         result = np.zeros(self.MAXVERTEX)
         result[list(range(self.VERTEXNUM))] = 1 - self.selectVertex
+        #result[np.where(result==0)]=-9999
         return result
         
     def reset(self):# 重置，随机产生给定k的选定顶点
@@ -123,14 +125,18 @@ class GraphEnv(Graph):
         self.graph[randomsample,randomsample] = 1
         return self.out()
     
+    def _findMaxIndex(self,r,info):
+        return np.where(r*info!=0)[0][np.argmax((r*info)[np.where(r*info!=0)])]
+    
     def act(self,action):#action:inputSize  0-(n-1): out select         n-2n:  in select    [one hot]
         assert len(action) == self.inputSize      
         outSelectVec = action[0:self.MAXVERTEX]
         inSelectVec = action[self.MAXVERTEX:2*self.MAXVERTEX]
-        outSelectVec = outSelectVec*self._selectVertexOut()
-        inSelectVec = inSelectVec*self._selectVertexOut_change()
-        outSelect = np.argmax(outSelectVec)
-        inSelect = np.argmax(inSelectVec)
+        outSelect = self._findMaxIndex(outSelectVec,self._selectVertexOut())#outSelectVec*self._selectVertexOut()
+        inSelect = self._findMaxIndex(inSelectVec,self._selectVertexOut_change())#inSelectVec*self._selectVertexOut_change()
+        #print(outSelect)
+        #outSelect = np.argmax(outSelectVec)
+        #inSelect = np.argmax(inSelectVec)
         assert self.graph[outSelect,outSelect] == 1
         assert self.graph[inSelect,inSelect] == 0
         self.graph[outSelect,outSelect] = 0

@@ -88,6 +88,8 @@ class DQN(object):
         model.compile(optimizer="adam", loss='categorical_crossentropy',metrics=["accuracy"])
         return model
         
+    def _findMaxIndex(self,r,info):
+        return np.where(r*info!=0)[1][np.argmax((r*info)[np.where(r*info!=0)])]
     def train(self):
         if len(self.memory)>=self.train_batch:
             minibatch = random.sample(self.memory,self.train_batch) 
@@ -96,8 +98,8 @@ class DQN(object):
             target_in_batch = np.zeros([self.train_batch,self.output_size//2]) 
             for i,(state, action, reward, next_state, done,info) in enumerate(minibatch):
                 state_batch[i,:,:] = state
-                action_out_num =  np.argmax(self.predict_action_out(state)[0]*info[0])
-                action_in_num = np.argmax(self.predict_action_in(state)[0]*info[1])
+                action_out_num =  self._findMaxIndex(self.predict_action_out(state),info[0])#np.argmax(self.predict_action_out(state)[0]*info[0])
+                action_in_num = self._findMaxIndex(self.predict_action_in(state),info[1])#np.argmax(self.predict_action_in(state)[0]*info[1])
                 target_out_batch[i,:] = self.predict_action_out(state)[0]
                 target_in_batch[i,:] = self.predict_action_in(state)[0]
                 target_out_batch[i,action_out_num] = reward if done else reward+self.gamma*np.amax(self.predict_action_out(next_state)[0]*info[0])
@@ -138,7 +140,7 @@ class DQN(object):
         
 
 
-MAXVERTEXNUM = 100
+MAXVERTEXNUM = 50
 
 env = GraphEnv(50,5,MAXVERTEXNUM)
 env.random(valuefun = np.random.random)
@@ -146,7 +148,7 @@ env.random(valuefun = np.random.random)
 agent = DQN(MAXVERTEXNUM)
 
 EPISODES = 1000
-MAXTIMES = 5000
+MAXTIMES = 500
 epochs = 32
 
 i = 0
@@ -160,17 +162,17 @@ for e in range(EPISODES):
         action.reshape([1,2*MAXVERTEXNUM])
         next_state,reward_pre,done,info = env.act(action)
         next_state = next_state.reshape([1,MAXVERTEXNUM,MAXVERTEXNUM])
-        reward = 0.1 if reward_pre>=lastreward else -10# TODO change reward
+        reward = 0.1 if reward_pre>=lastreward else -1# TODO change reward
         lastreward = reward_pre
         agent.remember(state,action,reward,next_state,done,info)
         state = next_state
         i += 1
         if done:
-            print('[times]:{}/{}\t\t[i]:{}\t[reward]:{}\t[epsilon]:{}'.format(e,EPISODES,times,reward_pre,agent.epsilon))
+            print('{}|[times]:{}/{}    [i]:{}/{}    [reward_pre]:{}    [epsilon]:{:.2f}    [DONE]'.format(i,e+1,EPISODES,times,MAXTIMES,reward_pre,agent.epsilon))
             break
         if i % epochs==0:
             agent.train()
-            print('{}|[times]:{}/{}\t\t[i]:{}\t[reward]:{}\t[epsilon]:{}'.format(i,e,EPISODES,times,reward_pre,agent.epsilon))
+            print('{}|[times]:{}/{}    [i]:{}/{}    [reward_pre]:{}    [epsilon]:{:.2f}'.format(i,e+1,EPISODES,times,MAXTIMES,reward_pre,agent.epsilon))
         
 
 
