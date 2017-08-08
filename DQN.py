@@ -83,7 +83,8 @@ class DQN(object):
         model = Sequential()
         model.add(Conv1D(self.train_batch//2 , 5,border_mode="valid",input_shape=self.input_size))
         model.add(Flatten())
-        model.add(Dense(self.output_size//2, activation="relu"))
+        model.add(Dense(200, activation="relu"))
+        model.add(Dense(self.output_size//2, activation="linear"))
         model.compile(optimizer="adam", loss='categorical_crossentropy',metrics=["accuracy"])
         return model
         
@@ -97,8 +98,11 @@ class DQN(object):
                 state_batch[i,:,:] = state
                 action_out_num =  np.argmax(self.predict_action_out(state)[0]*info[0])
                 action_in_num = np.argmax(self.predict_action_in(state)[0]*info[1])
+                target_out_batch[i,:] = self.predict_action_out(state)[0]
+                target_in_batch[i,:] = self.predict_action_in(state)[0]
                 target_out_batch[i,action_out_num] = reward if done else reward+self.gamma*np.amax(self.predict_action_out(next_state)[0]*info[0])
                 target_in_batch[i,action_in_num] = reward if done else reward+self.gamma*np.amax(self.predict_action_out(next_state)[0]*info[1])
+                #print(target_out_batch)
             self._outmodel.fit(state_batch, target_out_batch, epochs=1, verbose=0)
             self._inmodel.fit(state_batch, target_in_batch, epochs=1, verbose=0)
             if self.epsilon > self.epsilon_min:
