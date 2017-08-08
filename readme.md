@@ -29,4 +29,4 @@ copy from: https://github.com/j2kun/erdos-renyi
 
 
 - 多线程优化（现在暂不考虑）
-
+  cooperative multiagent rl, 多agent,多reward处理

@@ -44,10 +44,10 @@ class DQN(object):
         self.input_size = (MAXVERTEX,MAXVERTEX)
         self.output_size = 2*MAXVERTEX
         self.memory = deque(maxlen=3000)
-        self.gamma = 0.99    # discount rate
+        self.gamma = 0.9    # discount rate
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
-        self.epsilon_decay = 0.995
+        self.epsilon_decay = 0.998
         self.learning_rate = 0.001
         self.train_batch = 32
         self._inmodel = self._createModel()
@@ -143,7 +143,8 @@ class DQN(object):
 MAXVERTEXNUM = 50
 
 env = GraphEnv(50,5,MAXVERTEXNUM)
-env.random(valuefun = np.random.random)
+env.load('test')
+#env.random(valuefun = np.random.random)
 
 agent = DQN(MAXVERTEXNUM)
 
@@ -162,17 +163,17 @@ for e in range(EPISODES):
         action.reshape([1,2*MAXVERTEXNUM])
         next_state,reward_pre,done,info = env.act(action)
         next_state = next_state.reshape([1,MAXVERTEXNUM,MAXVERTEXNUM])
-        reward = 0.1 if reward_pre>=lastreward else -1# TODO change reward
+        reward = 0.5 if reward_pre>=lastreward else -1 # TODO change reward
         lastreward = reward_pre
         agent.remember(state,action,reward,next_state,done,info)
         state = next_state
         i += 1
         if done:
-            print('{}|[times]:{}/{}    [i]:{}/{}    [reward_pre]:{}    [epsilon]:{:.2f}    [DONE]'.format(i,e+1,EPISODES,times,MAXTIMES,reward_pre,agent.epsilon))
+            print('{}|[EPISODES]:{}/{}    [times]:{}/{}    [reward_pre]:{}    [epsilon]:{:.2f}    [DONE]'.format(i,e+1,EPISODES,times,MAXTIMES,reward_pre,agent.epsilon))
             break
         if i % epochs==0:
             agent.train()
-            print('{}|[times]:{}/{}    [i]:{}/{}    [reward_pre]:{}    [epsilon]:{:.2f}'.format(i,e+1,EPISODES,times,MAXTIMES,reward_pre,agent.epsilon))
+            print('{}|[EPISODES]:{}/{}    [times]:{}/{}    [reward_pre]:{}    [epsilon]:{:.2f}'.format(i,e+1,EPISODES,times,MAXTIMES,reward_pre,agent.epsilon))
         
 
 

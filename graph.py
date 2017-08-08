@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import random
-
-
+from itertools import combinations
+from scipy.special import comb
 
 
 class Graph(object):
@@ -92,9 +92,10 @@ class GraphEnv(Graph):
         if selectVerNum>=VertexNum:
             raise ValueError('select vertex nums({}) is bigger than vertex nums({}).'.format(selectVerNum,VertexNum))
         self.SELECTVECNUM = selectVerNum
-        self.initMaxValue()
-        self.reset()
         self.REWARDRUNTIMES = 1000
+        #self.initMaxValue()
+        self.reset()
+        
         
     @property
     def inputSize(self):# 输入action大小
@@ -149,13 +150,30 @@ class GraphEnv(Graph):
     def state(self):
         return self.out()
 
-    def done(self,reward_pre):# TODO 如果运行结果比其他算法的最优解好，则done
+    def done(self,reward_pre) -> bool:# TODO 如果运行结果比其他算法的最优解好，则done
         return False
     
     def initMaxValue(self):# TODO 调用其他的已知算法，求得大约的最优解
-        pass
+        '''
+        自杀式穷举...
+        '''
+        self.maxValue = 0
+        self.maxValue_Vertex = None
+        iternum = int(comb(self.VERTEXNUM,self.SELECTVECNUM))
+        i = 0
+        for temp in combinations(range(self.VERTEXNUM),self.SELECTVECNUM):
+            self.selectVertex = 0
+            self._graph[temp,temp] = 1
+            temp_reward_pre = self.reward_pre(self.REWARDRUNTIMES)
+            if temp_reward_pre > self.maxValue:
+                self.maxValue = temp_reward_pre
+                self.maxValue_Vertex = self.selectVertex
+            i += 1
+            if i%50==0:
+                print('running initMaxValue: i:{}/{:d}   maxValue={}'.format(i,iternum,self.maxValue))
+            
     
-    def reward_pre(self,n=2000):# TODO 算法准确率太低,尝试寻找新的算法解决
+    def reward_pre(self,n):# TODO 算法准确率太低,尝试寻找新的算法解决
         result = 0
         for i in range(n):
             selectVer = self.selectVertex.reshape([self.VERTEXNUM,1])
