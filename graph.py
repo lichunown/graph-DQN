@@ -3,7 +3,7 @@ import numpy as np
 import random
 from itertools import combinations
 from scipy.special import comb
-
+import networkx as nx
 
 class Graph(object):
     def __init__(self,VertexNum = 0,maxVertex=100,enableValue=True):
@@ -69,13 +69,24 @@ class Graph(object):
     def edge(self):
         result = []
         for H in range(self.VERTEXNUM):
-            for L in range(self.VERTEXNUM):
-                result.append((H,L,self.graph[H,L]))
+            for L in range(self.VERTEXNUM):                
+                    result.append((H,L,self.graph[H,L]))
         return result
     
     @property
     def graph(self):
         return self._graph
+    
+    def toNxDiGraph(self):
+        dig = nx.DiGraph()
+        for H in range(self.VERTEXNUM):
+            for L in range(self.VERTEXNUM):
+                if H==L:continue
+                if self.graph[H,L] != 0:
+                    dig.add_edge(H,L,weight=self.graph[H,L])
+        return dig
+    
+    
     
     def __str__(self):
         return str(self.graph.__str__())
@@ -92,7 +103,7 @@ class GraphEnv(Graph):
         if selectVerNum>=VertexNum:
             raise ValueError('select vertex nums({}) is bigger than vertex nums({}).'.format(selectVerNum,VertexNum))
         self.SELECTVECNUM = selectVerNum
-        self.REWARDRUNTIMES = 1000
+        self.REWARDRUNTIMES = 500
         #self.initMaxValue()
         self.reset()
         
