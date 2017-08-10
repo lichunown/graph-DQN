@@ -1,18 +1,8 @@
+# v1 (弃置不用版本)
+
 ## info
-
+经过多方讨论,决定重新修改算法...
 ### code
-
-
-#### DQN.py
-
-##### class: DQN
-
-
-#### graph.py
-
-##### class: Graph
-
-##### class: GraphEnv
 
 
 #### randomgraph.py
@@ -34,4 +24,8 @@ copy from: https://github.com/j2kun/erdos-renyi
 ## 一些问题
 - action过多, random很难对所有的action遍历, 导致DQN很难random到最优解进行训练.
 - 与最大割问题不同, 交换点的这种算法实际与前一个action无关. 即每一个动作之间不存在相互关联, DQN的理论似乎不能套在这里头. 
+
+# v2
+
+## TODO ing
 
