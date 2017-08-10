@@ -17,34 +17,19 @@ from keras.models import load_model
 from keras import backend as K
 from graph import GraphEnv
 
-#agent = DQN(env)
-#agent.load()
-#agent.epsilon = 0
-#
-#for i_episode in range(3):
-#    observation = env.reset()
-#    while True:
-#        env.render()
-#        print(observation)
-#        action = agent.action(observation)
-#        observation, reward, done, info = env.step(action)
-#        time.sleep(1/10)
-#        if done:
-#            print('DONE')
-#            time.sleep(1)
-#            break
+
 '''
 input_size: [self.MAXVERTEX,self.MAXVERTEX]
     
-output_size:
+output_size:[self.MAXVERTEX]
 
 '''
 class DQN(object):
     def __init__(self,MAXVERTEX):
         self.input_size = (MAXVERTEX,MAXVERTEX)
-        self.output_size = 2*MAXVERTEX
+        self.output_size = MAXVERTEX
         self.memory = deque(maxlen=3000)
-        self.gamma = 0.9    # discount rate
+        self.gamma = 1    # discount rate
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.998
@@ -83,13 +68,14 @@ class DQN(object):
         model = Sequential()
         model.add(Conv1D(self.train_batch//2 , 5,border_mode="valid",input_shape=self.input_size))
         model.add(Flatten())
-        model.add(Dense(200, activation="relu"))
+        model.add(Dense(500, activation="relu"))
         model.add(Dense(self.output_size//2, activation="linear"))
         model.compile(optimizer="adam", loss='categorical_crossentropy',metrics=["accuracy"])
         return model
         
     def _findMaxIndex(self,r,info):
         return np.where(r*info!=0)[1][np.argmax((r*info)[np.where(r*info!=0)])]
+    
     def train(self):
         if len(self.memory)>=self.train_batch:
             minibatch = random.sample(self.memory,self.train_batch) 
@@ -140,47 +126,7 @@ class DQN(object):
         
 
 
-MAXVERTEXNUM = 50
 
-env = GraphEnv(50,5,MAXVERTEXNUM)
-env.load('test')
-#env.random(valuefun = np.random.random)
-
-agent = DQN(MAXVERTEXNUM)
-
-EPISODES = 10000
-MAXTIMES = 500
-epochs = 32
-
-i = 0
-maxValue = 0
-maxValue_Vertex = None
-
-for e in range(EPISODES):
-    state = env.reset()
-    state = state.reshape([1,MAXVERTEXNUM,MAXVERTEXNUM])
-    lastreward = 0  
-    for times in range(MAXTIMES):
-        action = agent.act(state)
-        action.reshape([1,2*MAXVERTEXNUM])
-        next_state,reward_pre,done,info = env.act(action)
-        next_state = next_state.reshape([1,MAXVERTEXNUM,MAXVERTEXNUM])
-        reward = 10 if reward_pre>=lastreward else -1 # TODO change reward
-        if reward_pre > maxValue:
-            maxValue = reward_pre
-            maxValue_Vertex = env.selectVertex
-        lastreward = reward_pre
-        agent.remember(state,action,reward,next_state,done,info)
-        state = next_state
-        i += 1
-        if done:
-            print('{}|[EPISODES]:{}/{}    [times]:{}/{}    [max_reward]:{}    [reward_pre]:{}    [epsilon]:{:.2f}'.format(i,e+1,EPISODES,times,MAXTIMES,maxValue,reward_pre,agent.epsilon))
-            break
-        if i % epochs==0:
-            agent.train()
-            print('{}|[EPISODES]:{}/{}    [times]:{}/{}    [max_reward]:{}    [reward_pre]:{}    [epsilon]:{:.2f}'.format(i,e+1,EPISODES,times,MAXTIMES,maxValue,reward_pre,agent.epsilon))
-            agent._inmodel.save_weights('inmodel.weight')
-            agent._outmodel.save_weights('outmodel.weight')
         
 
 

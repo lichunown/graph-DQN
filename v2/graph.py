@@ -110,7 +110,7 @@ class GraphEnv(Graph):
         
     @property
     def inputSize(self):# 输入action大小
-        return 2*self.MAXVERTEX
+        return self.MAXVERTEX
     
     @property
     def selectVertex(self):# 选中的顶点
@@ -119,50 +119,46 @@ class GraphEnv(Graph):
     def selectVertex(self,ver):
         self.graph[list(range(self.VERTEXNUM)),list(range(self.VERTEXNUM))] = ver
         
-    def _selectVertexOut(self):# 为处理神经网络数据产生的
-        result = np.zeros(self.MAXVERTEX)
-        result[list(range(self.VERTEXNUM))] = self.selectVertex
-        #result[np.where(result==0)]=-9999
-        return result
+#    def _selectVertexOut(self):# 为处理神经网络数据产生的
+#        result = np.zeros(self.MAXVERTEX)
+#        result[list(range(self.VERTEXNUM))] = self.selectVertex
+#        return result
     
     def _selectVertexOut_change(self):# 同上，只是在已存在点求了次补
         result = np.zeros(self.MAXVERTEX)
         result[list(range(self.VERTEXNUM))] = 1 - self.selectVertex
-        #result[np.where(result==0)]=-9999
         return result
         
-    def reset(self):# 重置，随机产生给定k的选定顶点
+    def reset(self):# 重置，为0
         self.selectVertex = 0
-        randomsample = random.sample(list(range(self.VERTEXNUM)),self.SELECTVECNUM)
-        self.graph[randomsample,randomsample] = 1
         return self.out()
     
     def _findMaxIndex(self,r,info):
         return np.where(r*info!=0)[0][np.argmax((r*info)[np.where(r*info!=0)])]
     
-    def act(self,action):#action:inputSize  0-(n-1): out select         n-2n:  in select    [one hot]
+    def act(self,action):#action:inputSize  0-(n-1): select new Vertex 
+        assert np.sum(self.selectVertex) < self.SELECTVECNUM
         assert len(action) == self.inputSize      
-        outSelectVec = action[0:self.MAXVERTEX]
-        inSelectVec = action[self.MAXVERTEX:2*self.MAXVERTEX]
-        outSelect = self._findMaxIndex(outSelectVec,self._selectVertexOut())#outSelectVec*self._selectVertexOut()
-        inSelect = self._findMaxIndex(inSelectVec,self._selectVertexOut_change())#inSelectVec*self._selectVertexOut_change()
+        newSelectVec = action.reshape([self.MAXVERTEX])
+        #inSelectVec = action[self.MAXVERTEX:2*self.MAXVERTEX]
+        newSelect = self._findMaxIndex(newSelectVec,self._selectVertexOut_change())#outSelectVec*self._selectVertexOut()
+        #inSelect = self._findMaxIndex(inSelectVec,self._selectVertexOut_change())#inSelectVec*self._selectVertexOut_change()
         #print(outSelect)
         #outSelect = np.argmax(outSelectVec)
         #inSelect = np.argmax(inSelectVec)
-        assert self.graph[outSelect,outSelect] == 1
-        assert self.graph[inSelect,inSelect] == 0
-        self.graph[outSelect,outSelect] = 0
-        self.graph[inSelect,inSelect] = 1
-        reward_pre = self.reward_pre(self.REWARDRUNTIMES)
-        done = self.done(reward_pre)
-        return self.state,reward_pre,done,(self._selectVertexOut(),self._selectVertexOut_change())
+        assert self.graph[newSelect,newSelect] == 0
+        #assert self.graph[inSelect,inSelect] == 0
+        self.graph[newSelect,newSelect] = 1
+        #self.graph[inSelect,inSelect] = 1
+        return self.state,self.reward_pre,self.done,self._selectVertexOut_change()
     
     @property
     def state(self):
         return self.out()
 
-    def done(self,reward_pre) -> bool:# TODO 如果运行结果比其他算法的最优解好，则done
-        return False
+    @property
+    def done(self) -> bool:# TODO 如果运行结果比其他算法的最优解好，则done
+        return np.sum(self.selectVertex)==self.SELECTVECNUM
     
     def initMaxValue(self):# TODO 调用其他的已知算法，求得大约的最优解
         '''
@@ -183,25 +179,32 @@ class GraphEnv(Graph):
             if i%50==0:
                 print('running initMaxValue: i:{}/{:d}   maxValue={}'.format(i,iternum,self.maxValue))
             
-    
-    def reward_pre(self,n):# TODO 算法准确率太低,尝试寻找新的算法解决
+    @property
+    def reward_pre(self):# TODO 算法准确率太低,尝试寻找新的算法解决
         result = 0
-        for i in range(n):
+        for i in range(self.REWARDRUNTIMES):
             selectVer = self.selectVertex.reshape([self.VERTEXNUM,1])
             tempgraph = self.graph >= np.random.random([self.VERTEXNUM,self.VERTEXNUM])
             succeedver = np.sum((selectVer*tempgraph).astype('bool'),0).astype('bool')
             result += np.sum(succeedver)
-        return result/n
+        return result/self.REWARDRUNTIMES
 
 
 
-
-
-   
-#a = GraphEnv(5,3,100)
-#a.random(valuefun = np.random.random)
+#MAXVERTEXNUM = 50
+#VERTEXNUM = 50
+#SELECTNUM = 25
+#assert MAXVERTEXNUM >= VERTEXNUM
+#assert VERTEXNUM >= SELECTNUM
+#
+#a = GraphEnv(VERTEXNUM,SELECTNUM,MAXVERTEXNUM)
+##a.random(valuefun = np.random.random)
+#a.random(valuefun = lambda x:0.1)
 #a.reset()
-#for i in range(10):
-#    state,reward_pre,done,info = a.act(np.random.random(200))
-#    print('{}:    {}    reward1={}    reward2={}'.format(i,a.selectVertex,reward_pre,a.reward_pre()))
+#
+#for i in range(SELECTNUM):
+#    state,reward_pre,done,info = a.act(np.random.random(MAXVERTEXNUM))
+#    print('{}:    {}    reward1={}    reward2={}'.format(i,a.selectVertex,reward_pre,a.reward_pre))
+#    if done:
+#        break
 
