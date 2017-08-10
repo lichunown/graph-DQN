@@ -138,10 +138,11 @@ class GraphEnv(Graph):
     
     def act(self,action):#action:inputSize  0-(n-1): select new Vertex 
         assert np.sum(self.selectVertex) < self.SELECTVECNUM
-        assert len(action) == self.inputSize      
-        newSelectVec = action.reshape([self.MAXVERTEX])
+        assert len(action) == self.inputSize     
+        assert action.shape == (self.MAXVERTEX,)
+        #newSelectVec = action.reshape([self.MAXVERTEX])
         #inSelectVec = action[self.MAXVERTEX:2*self.MAXVERTEX]
-        newSelect = self._findMaxIndex(newSelectVec,self._selectVertexOut_change())#outSelectVec*self._selectVertexOut()
+        newSelect = self._findMaxIndex(action,self._selectVertexOut_change())#outSelectVec*self._selectVertexOut()
         #inSelect = self._findMaxIndex(inSelectVec,self._selectVertexOut_change())#inSelectVec*self._selectVertexOut_change()
         #print(outSelect)
         #outSelect = np.argmax(outSelectVec)
@@ -192,8 +193,8 @@ class GraphEnv(Graph):
 
 
 #MAXVERTEXNUM = 50
-#VERTEXNUM = 50
-#SELECTNUM = 25
+#VERTEXNUM = 25
+#SELECTNUM = 5
 #assert MAXVERTEXNUM >= VERTEXNUM
 #assert VERTEXNUM >= SELECTNUM
 #
@@ -203,8 +204,11 @@ class GraphEnv(Graph):
 #a.reset()
 #
 #for i in range(SELECTNUM):
-#    state,reward_pre,done,info = a.act(np.random.random(MAXVERTEXNUM))
-#    print('{}:    {}    reward1={}    reward2={}'.format(i,a.selectVertex,reward_pre,a.reward_pre))
+#    action = np.random.random(MAXVERTEXNUM)
+#    state,reward_pre,done,info = a.act(action)
+#    print('{i}:    {a.selectVertex}    reward1={reward_pre}\n'.format(i=i,a=a,reward_pre=reward_pre,action=action))
+#    print(np.max(a._selectVertexOut_change()*action),np.argmax(a._selectVertexOut_change()*action),action[np.argmax(a._selectVertexOut_change()*action)])
+#    print(action[np.argmax(a._selectVertexOut_change()*action)]==np.max(a._selectVertexOut_change()*action))
 #    if done:
 #        break
-
+#

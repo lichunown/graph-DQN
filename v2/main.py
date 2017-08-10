@@ -5,17 +5,24 @@ from graph import GraphEnv
 from DQN import DQN
 
 
-MAXVERTEXNUM = 50
+MAXVERTEXNUM = 10
 
-env = GraphEnv(50,5,MAXVERTEXNUM)
-env.load('test')
+VERTEXNUM = 10
+SELECTNUM = 3
+
+
+env = GraphEnv(VERTEXNUM,SELECTNUM,MAXVERTEXNUM)
+
+#env.load('test')
+env.random(valuefun = lambda x:0.2)
 #env.random(valuefun = np.random.random)
 
 agent = DQN(MAXVERTEXNUM)
 
-EPISODES = 10000
-MAXTIMES = 500
+EPISODES = 100000
+MAXTIMES = SELECTNUM
 epochs = 32
+traintemp = 1
 
 i = 0
 maxValue = 0
@@ -27,10 +34,11 @@ for e in range(EPISODES):
     lastreward = 0  
     for times in range(MAXTIMES):
         action = agent.act(state)
-        action.reshape([1,2*MAXVERTEXNUM])
+        action.reshape([1,MAXVERTEXNUM])
         next_state,reward_pre,done,info = env.act(action)
         next_state = next_state.reshape([1,MAXVERTEXNUM,MAXVERTEXNUM])
-        reward = 10 if reward_pre>=lastreward else -1 # TODO change reward
+        reward = reward_pre/10
+        #reward = 10 if reward_pre>=lastreward else -1 # TODO change reward
         if reward_pre > maxValue:
             maxValue = reward_pre
             maxValue_Vertex = env.selectVertex
@@ -38,11 +46,12 @@ for e in range(EPISODES):
         agent.remember(state,action,reward,next_state,done,info)
         state = next_state
         i += 1
-        if done:
-            print('{}|[EPISODES]:{}/{}    [times]:{}/{}    [max_reward]:{}    [reward_pre]:{}    [epsilon]:{:.2f}'.format(i,e+1,EPISODES,times,MAXTIMES,maxValue,reward_pre,agent.epsilon))
-            break
-        if i % epochs==0:
+        if i % traintemp==0:
             agent.train()
-            print('{}|[EPISODES]:{}/{}    [times]:{}/{}    [max_reward]:{}    [reward_pre]:{}    [epsilon]:{:.2f}'.format(i,e+1,EPISODES,times,MAXTIMES,maxValue,reward_pre,agent.epsilon))
-            agent._inmodel.save_weights('inmodel.weight')
-            agent._outmodel.save_weights('outmodel.weight')
+        if i % epochs==0:
+            print('{}|[EPISODES]:{}/{}    [times]:{}/{}    [max_reward]:{}    [reward_pre]:{}    [tempTrueReward]:{:.2f}    [epsilon]:{:.2f}'\
+                  .format(i,e+1,EPISODES,times+1,MAXTIMES,maxValue,reward_pre,                  \
+                   action[agent._findMaxIndex(action,info)],agent.epsilon))            
+            agent.model.save_weights('outmodel.weight')
+        if done:
+            break

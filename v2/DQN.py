@@ -35,8 +35,7 @@ class DQN(object):
         self.epsilon_decay = 0.998
         self.learning_rate = 0.001
         self.train_batch = 32
-        self._inmodel = self._createModel()
-        self._outmodel = self._createModel()
+        self._model = self._createModel()
         
     @property
     def model(self):
@@ -69,40 +68,40 @@ class DQN(object):
         model.add(Conv1D(self.train_batch//2 , 5,border_mode="valid",input_shape=self.input_size))
         model.add(Flatten())
         model.add(Dense(500, activation="relu"))
-        model.add(Dense(self.output_size//2, activation="linear"))
+        model.add(Dense(self.output_size, activation="linear"))
         model.compile(optimizer="adam", loss='categorical_crossentropy',metrics=["accuracy"])
         return model
         
     def _findMaxIndex(self,r,info):
-        return np.where(r*info!=0)[1][np.argmax((r*info)[np.where(r*info!=0)])]
+        return np.where(r*info!=0)[0][np.argmax((r*info)[np.where(r*info!=0)])]
     
     def train(self):
         if len(self.memory)>=self.train_batch:
             minibatch = random.sample(self.memory,self.train_batch) 
             state_batch = np.zeros([self.train_batch,self.input_size[0],self.input_size[1]])
-            target_out_batch = np.zeros([self.train_batch,self.output_size//2]) 
-            target_in_batch = np.zeros([self.train_batch,self.output_size//2]) 
+            target_batch = np.zeros([self.train_batch,self.output_size]) 
+            #target_in_batch = np.zeros([self.train_batch,self.output_size]) 
             for i,(state, action, reward, next_state, done,info) in enumerate(minibatch):
                 state_batch[i,:,:] = state
-                action_out_num =  self._findMaxIndex(self.predict_action_out(state),info[0])#np.argmax(self.predict_action_out(state)[0]*info[0])
-                action_in_num = self._findMaxIndex(self.predict_action_in(state),info[1])#np.argmax(self.predict_action_in(state)[0]*info[1])
-                target_out_batch[i,:] = self.predict_action_out(state)[0]
-                target_in_batch[i,:] = self.predict_action_in(state)[0]
-                target_out_batch[i,action_out_num] = reward if done else reward+self.gamma*np.amax(self.predict_action_out(next_state)[0]*info[0])
-                target_in_batch[i,action_in_num] = reward if done else reward+self.gamma*np.amax(self.predict_action_out(next_state)[0]*info[1])
+                action_num =  self._findMaxIndex(self.predict_action(state)[0],info)#np.argmax(self.predict_action_out(state)[0]*info[0])
+                #action_in_num = self._findMaxIndex(self.predict_action_in(state),info[1])#np.argmax(self.predict_action_in(state)[0]*info[1])
+                target_batch[i,:] = self.predict_action(state)[0]
+                #target_in_batch[i,:] = self.predict_action_in(state)[0]
+                target_batch[i,action_num] = reward if done else reward+self.gamma*np.amax(self.predict_action(next_state)[0]*info)
+                #target_in_batch[i,action_in_num] = reward if done else reward+self.gamma*np.amax(self.predict_action_out(next_state)[0]*info[1])
                 #print(target_out_batch)
-            self._outmodel.fit(state_batch, target_out_batch, epochs=1, verbose=0)
-            self._inmodel.fit(state_batch, target_in_batch, epochs=1, verbose=0)
+            self._model.fit(state_batch, target_batch, epochs=1, verbose=0)
+            #self._inmodel.fit(state_batch, target_in_batch, epochs=1, verbose=0)
             if self.epsilon > self.epsilon_min:
                 self.epsilon *= self.epsilon_decay
             
 
-    def predict_action_out(self,state):# 预测动作
-        return self._outmodel.predict(state)
-    def predict_action_in(self,state):# 预测动作
-        return self._inmodel.predict(state)
+#    def predict_action_out(self,state):# 预测动作
+#        return self._outmodel.predict(state)
+#    def predict_action_in(self,state):# 预测动作
+#        return self._inmodel.predict(state)
     def predict_action(self,state):
-        return np.concatenate([self.predict_action_out(state),self.predict_action_in(state)],1)
+        return self.model.predict(state)
     
     def act(self,state):# 执行的动作，具有随机性
         if random.random() < self.epsilon:
@@ -125,9 +124,18 @@ class DQN(object):
         self.model.load_weights(name+'.weight')
         
 
+MAXVERTEXNUM = 50
+agent = DQN(MAXVERTEXNUM)
+for i in range(32):
+    agent.remember(np.random.random([1,MAXVERTEXNUM,MAXVERTEXNUM]),
+                   np.random.random([MAXVERTEXNUM]),
+                   np.random.random(),
+                   np.random.random([1,MAXVERTEXNUM,MAXVERTEXNUM]),
+                   random.sample([True,False],1),
+                   np.random.random([MAXVERTEXNUM]),
+                   )
 
-
-        
-
+agent.train()  
+agent.predict_action(np.random.random([1,MAXVERTEXNUM,MAXVERTEXNUM]))
 
 
