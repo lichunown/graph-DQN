@@ -5,8 +5,8 @@ from graph import GraphEnv
 from DQN import DQN
 
 
-MAXVERTEXNUM = 20
-VERTEXNUM = 20
+MAXVERTEXNUM = 15
+VERTEXNUM = 15
 SELECTNUM = 5
 
 
@@ -29,6 +29,7 @@ maxValue_Vertex = None
 
 for g in range(GRAPHTYPE):
     env.random(valuefun = np.random.random)
+    expect,expectmaxVertex = env.initMaxValue()
     for e in range(EPISODES):
         state = env.reset()
         lastreward = 0  
@@ -50,7 +51,7 @@ for g in range(GRAPHTYPE):
             if i % savetimes==0:          
                 agent.model.save_weights('outmodel.weight')
             if done:
-                print('{}|[G]:{}/{}   [EPISODES]:{}/{}   [times]:{}/{}   [max_reward]:{}   [reward_pre]:{}   [temp]:{:.2f}   [epsilon]:{:.2f}'\
-                      .format(i,g+1,GRAPHTYPE,e+1,EPISODES,times+1,MAXTIMES,maxValue,reward_pre,                  \
+                print('{}|[G]:{}/{}   [EPISODES]:{}/{}   [times]:{}/{}   [expect]:{}   [max_reward]:{}   [reward_pre]:{}   [temp]:{:.2f}   [epsilon]:{:.2f}'\
+                      .format(i,g+1,GRAPHTYPE,e+1,EPISODES,times+1,MAXTIMES,expect,maxValue,reward_pre,                  \
                        action[agent._findMaxIndex(action,info)],agent.epsilon))              
                 break

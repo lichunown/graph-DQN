@@ -105,7 +105,7 @@ class GraphEnv(Graph):
         if selectVerNum>=VertexNum:
             raise ValueError('select vertex nums({}) is bigger than vertex nums({}).'.format(selectVerNum,VertexNum))
         self.SELECTVECNUM = selectVerNum
-        self.REWARDRUNTIMES = 500
+        self.REWARDRUNTIMES = 800
         #self.initMaxValue()
         self.reset()
         
@@ -174,6 +174,7 @@ class GraphEnv(Graph):
         self.maxValue = 0
         self.maxValue_Vertex = None
         iternum = int(comb(self.VERTEXNUM,self.SELECTVECNUM))
+        print('running initMaxValue alliter = %d'%iternum)
         i = 0
         for temp in combinations(range(self.VERTEXNUM),self.SELECTVECNUM):
             self.selectVertex = 0
@@ -185,7 +186,7 @@ class GraphEnv(Graph):
             i += 1
             if i%50==0:
                 print('running initMaxValue: i:{}/{:d}   maxValue={}'.format(i,iternum,self.maxValue))
-            return self.maxValue_Vertex
+        return (self.maxValue,self.maxValue_Vertex)
     @property
     def reward_pre(self):# TODO 算法准确率太低,尝试寻找新的算法解决
         result = 0
