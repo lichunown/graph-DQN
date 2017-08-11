@@ -120,7 +120,11 @@ class GraphEnv(Graph):
     @selectVertex.setter
     def selectVertex(self,ver):
         self.graph[list(range(self.VERTEXNUM)),list(range(self.VERTEXNUM))] = ver
-        
+    
+    def selectVertexOut(self):
+        r = -1*np.ones([self.MAXVERTEX])
+        r[:self.VERTEXNUM] = self.selectVertex
+        return r
 #    def _selectVertexOut(self):# 为处理神经网络数据产生的
 #        result = np.zeros(self.MAXVERTEX)
 #        result[list(range(self.VERTEXNUM))] = self.selectVertex
@@ -157,7 +161,7 @@ class GraphEnv(Graph):
     
     @property
     def state(self):
-        return [self.out().reshape([1,self.MAXVERTEX,self.MAXVERTEX]),self.selectVertex.reshape([1,self.MAXVERTEX])]
+        return [self.out().reshape([1,self.MAXVERTEX,self.MAXVERTEX]),self.selectVertexOut().reshape([1,self.MAXVERTEX])]
 
     @property
     def done(self) -> bool:# TODO 如果运行结果比其他算法的最优解好，则done
