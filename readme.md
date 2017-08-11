@@ -29,3 +29,9 @@ copy from: https://github.com/j2kun/erdos-renyi
 
 ## TODO ing
 
+## next
+
+- model重新设计
+- 使用多个图进行训练
+
+

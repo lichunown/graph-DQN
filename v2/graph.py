@@ -33,7 +33,9 @@ class Graph(object):
             self._graph[nextV,firstV] = value
     def out(self):
         outg = -1*np.ones([self.MAXVERTEX,self.MAXVERTEX])
-        outg[[[i] for i in range(self.VERTEXNUM)],[list(range(self.VERTEXNUM)) for i in range(self.VERTEXNUM)]] = self._graph
+        temp = self._graph.copy()
+        temp[list(range(self.VERTEXNUM)),list(range(self.VERTEXNUM))] = 0
+        outg[[[i] for i in range(self.VERTEXNUM)],[list(range(self.VERTEXNUM)) for i in range(self.VERTEXNUM)]] = temp
         return outg
     def isConnected(self,a,b):
         return self.graph[a,b]
@@ -131,7 +133,7 @@ class GraphEnv(Graph):
         
     def reset(self):# 重置，为0
         self.selectVertex = 0
-        return self.out()
+        return self.state
     
     def _findMaxIndex(self,r,info):
         return np.where(r*info!=0)[0][np.argmax((r*info)[np.where(r*info!=0)])]
@@ -155,7 +157,7 @@ class GraphEnv(Graph):
     
     @property
     def state(self):
-        return self.out()
+        return [self.out().reshape([1,self.MAXVERTEX,self.MAXVERTEX]),self.selectVertex.reshape([1,self.MAXVERTEX])]
 
     @property
     def done(self) -> bool:# TODO 如果运行结果比其他算法的最优解好，则done
@@ -172,14 +174,14 @@ class GraphEnv(Graph):
         for temp in combinations(range(self.VERTEXNUM),self.SELECTVECNUM):
             self.selectVertex = 0
             self._graph[temp,temp] = 1
-            temp_reward_pre = self.reward_pre(self.REWARDRUNTIMES)
+            temp_reward_pre = self.reward_pre
             if temp_reward_pre > self.maxValue:
                 self.maxValue = temp_reward_pre
                 self.maxValue_Vertex = self.selectVertex
             i += 1
             if i%50==0:
                 print('running initMaxValue: i:{}/{:d}   maxValue={}'.format(i,iternum,self.maxValue))
-            
+            return self.maxValue_Vertex
     @property
     def reward_pre(self):# TODO 算法准确率太低,尝试寻找新的算法解决
         result = 0
@@ -192,9 +194,9 @@ class GraphEnv(Graph):
 
 
 
-#MAXVERTEXNUM = 50
-#VERTEXNUM = 25
-#SELECTNUM = 5
+#MAXVERTEXNUM = 10
+#VERTEXNUM = 10
+#SELECTNUM = 3
 #assert MAXVERTEXNUM >= VERTEXNUM
 #assert VERTEXNUM >= SELECTNUM
 #

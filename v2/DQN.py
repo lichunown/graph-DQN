@@ -64,11 +64,26 @@ class DQN(object):
         return _model    
     '''
     def _createModel(self,dd=True): # TODO models
+#        model = Sequential()
+#        model.add(Conv1D(self.train_batch//2 , 5,border_mode="valid",input_shape=self.input_size))
+#        model.add(Flatten())
+#        model.add(Dense(500, activation="relu"))
+#        model.add(Dense(self.output_size, activation="linear"))
+        
+        gmodel = Sequential()
+        gmodel.add(Conv1D(self.train_batch//2 , 5,border_mode="valid",input_shape=self.input_size))
+        gmodel.add(MaxPooling1D(pool_length=2, border_mode="valid"))
+        gmodel.add(Dropout(0.3))
+        gmodel.add(Flatten())
+        
+        vmodel = Sequential()
+        vmodel.add(Dense(100, input_shape=(self.output_size,),activation="relu"))
+        vmodel.add(Dense(100, activation="relu"))
+        
         model = Sequential()
-        model.add(Conv1D(self.train_batch//2 , 5,border_mode="valid",input_shape=self.input_size))
-        model.add(Flatten())
-        model.add(Dense(500, activation="relu"))
+        model.add(Merge([gmodel, vmodel], mode="concat", concat_axis=-1))
         model.add(Dense(self.output_size, activation="linear"))
+        
         model.compile(optimizer="adam", loss='categorical_crossentropy',metrics=["accuracy"])
         return model
         
@@ -78,19 +93,18 @@ class DQN(object):
     def train(self):
         if len(self.memory)>=self.train_batch:
             minibatch = random.sample(self.memory,self.train_batch) 
-            state_batch = np.zeros([self.train_batch,self.input_size[0],self.input_size[1]])
+            state_batch_g = np.zeros([self.train_batch,self.input_size[0],self.input_size[1]])
+            state_batch_v = np.zeros([self.train_batch,self.output_size]) 
             target_batch = np.zeros([self.train_batch,self.output_size]) 
             #target_in_batch = np.zeros([self.train_batch,self.output_size]) 
-            for i,(state, action, reward, next_state, done,info) in enumerate(minibatch):
-                state_batch[i,:,:] = state
-                action_num =  self._findMaxIndex(self.predict_action(state)[0],info)#np.argmax(self.predict_action_out(state)[0]*info[0])
-                #action_in_num = self._findMaxIndex(self.predict_action_in(state),info[1])#np.argmax(self.predict_action_in(state)[0]*info[1])
-                target_batch[i,:] = self.predict_action(state)[0]
-                #target_in_batch[i,:] = self.predict_action_in(state)[0]
-                target_batch[i,action_num] = reward if done else reward+self.gamma*np.amax(self.predict_action(next_state)[0]*info)
-                #target_in_batch[i,action_in_num] = reward if done else reward+self.gamma*np.amax(self.predict_action_out(next_state)[0]*info[1])
-                #print(target_out_batch)
-            self._model.fit(state_batch, target_batch, epochs=1, verbose=0)
+            for i,((state_g,state_v), action, reward, (next_state_g,next_state_v), done,info) in enumerate(minibatch):
+                state_batch_g[i,:,:] = state_g
+                state_batch_v[i,:] = state_v
+                action_num =  self._findMaxIndex(self.predict_action([state_g,state_v])[0],info)#np.argmax(self.predict_action_out(state)[0]*info[0])
+                target_batch[i,:] = self.predict_action([state_g,state_v])[0]
+                target_batch[i,action_num] = reward if done else reward+self.gamma*np.amax(self.predict_action([next_state_g,next_state_v])[0]*info)
+
+            self._model.fit([state_batch_g,state_batch_v], target_batch, epochs=1, verbose=0)
             #self._inmodel.fit(state_batch, target_in_batch, epochs=1, verbose=0)
             if self.epsilon > self.epsilon_min:
                 self.epsilon *= self.epsilon_decay
@@ -123,19 +137,19 @@ class DQN(object):
     def loadWeight(self,name = 'models/test'):
         self.model.load_weights(name+'.weight')
         
-
-MAXVERTEXNUM = 50
-agent = DQN(MAXVERTEXNUM)
-for i in range(32):
-    agent.remember(np.random.random([1,MAXVERTEXNUM,MAXVERTEXNUM]),
-                   np.random.random([MAXVERTEXNUM]),
-                   np.random.random(),
-                   np.random.random([1,MAXVERTEXNUM,MAXVERTEXNUM]),
-                   random.sample([True,False],1),
-                   np.random.random([MAXVERTEXNUM]),
-                   )
-
-agent.train()  
-agent.predict_action(np.random.random([1,MAXVERTEXNUM,MAXVERTEXNUM]))
-
-
+#
+#MAXVERTEXNUM = 50
+#agent = DQN(MAXVERTEXNUM)
+#for i in range(32):
+#    agent.remember([np.random.random([1,MAXVERTEXNUM,MAXVERTEXNUM]),np.random.random([MAXVERTEXNUM])],
+#                   np.random.random([MAXVERTEXNUM]),
+#                   np.random.random(),
+#                   [np.random.random([1,MAXVERTEXNUM,MAXVERTEXNUM]),np.random.random([MAXVERTEXNUM])],
+#                   random.sample([True,False],1),
+#                   np.random.random([MAXVERTEXNUM]),
+#                   )
+#
+#agent.train()  
+#agent.predict_action(np.random.random([1,MAXVERTEXNUM,MAXVERTEXNUM]))
+#
+#
