@@ -1,6 +1,6 @@
 # IM-DQN 
 
-## *(Influence Maximazation problem with Deep Q-Network)*
+## *(Influence Maximization problem with Deep Q-Network)*
 
 **`status: working`**
 
