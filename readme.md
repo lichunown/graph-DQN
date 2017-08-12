@@ -1,4 +1,6 @@
-# IM-DQN *(Influence Maximazation problem with Deep Q-Network)*
+# IM-DQN 
+
+## *(Influence Maximazation problem with Deep Q-Network)*
 
 **`status: working`**
 
@@ -43,12 +45,12 @@ marked but not use in this project
 
 ## Refrences
 
-[1]	J. Lee, H. Kim, J. Lee, and S. Yoon, “Intrinsic Geometric Information Transfer Learning on Multiple Graph-Structured Datasets,” arXiv, vol. cs.NE. 15-Nov-2016.
-[2]	Y. Tang, Y. Shi, and X. Xiao, “Influence Maximization in Near-Linear Time,” presented at the the 2015 ACM SIGMOD International Conference, New York, New York, USA, 2015, pp. 1539–1554.
-[3]	L. F. R. Ribeiro, P. H. P. Saverese, and D. R. Figueiredo, “struc2vec,” presented at the the 23rd ACM SIGKDD International Conference, New York, New York, USA, 2017, pp. 385–394.
-[4]	H. Dai, B. Dai, and Le Song, “Discriminative Embeddings of Latent Variable Models for Structured Data,” arXiv. pp. 1–23, 28-Sep-2016.
-[5]	W. Chen, Y. Wang, and S. Yang, “Efficient Influence Maximization in Social Networks,” presented at the KDD '09, 2009, pp. 1–9.
-[6]	Y. Chen, E. Matus, and G. P. Fettweis, “Combined TDM and SDM Circuit Switching NoCs with Dedicated Connection Allocator,” presented at the 2017 IEEE Computer Society Annual Symposium on VLSI (ISVLSI, 2017, pp. 104–109.
-[7]	H. Dai, E. B. Khalil, Y. Zhang, B. Dilkina, and Le Song, “Learning Combinatorial Optimization Algorithms over Graphs,” arXiv. pp. 1–28, 04-May-2017.
-[8]	A. Phadtare, A. Bahmani, A. Shah, and R. Pietrobon, “Scientific writing: a randomized controlled trial comparing standard and on-line instruction,” BMC Medical Education, vol. 9, no. 1, p. 27, May 2009.
+- [1]	J. Lee, H. Kim, J. Lee, and S. Yoon, “Intrinsic Geometric Information Transfer Learning on Multiple Graph-Structured Datasets,” arXiv, vol. cs.NE. 15-Nov-2016.
+- [2]	Y. Tang, Y. Shi, and X. Xiao, “Influence Maximization in Near-Linear Time,” presented at the the 2015 ACM SIGMOD International Conference, New York, New York, USA, 2015, pp. 1539–1554.
+- [3]	L. F. R. Ribeiro, P. H. P. Saverese, and D. R. Figueiredo, “struc2vec,” presented at the the 23rd ACM SIGKDD International Conference, New York, New York, USA, 2017, pp. 385–394.
+- [4]	H. Dai, B. Dai, and Le Song, “Discriminative Embeddings of Latent Variable Models for Structured Data,” arXiv. pp. 1–23, 28-Sep-2016.
+- [5]	W. Chen, Y. Wang, and S. Yang, “Efficient Influence Maximization in Social Networks,” presented at the KDD '09, 2009, pp. 1–9.
+- [6]	Y. Chen, E. Matus, and G. P. Fettweis, “Combined TDM and SDM Circuit Switching NoCs with Dedicated Connection Allocator,” presented at the 2017 IEEE Computer Society Annual Symposium on VLSI (ISVLSI, 2017, pp. 104–109.
+- [7]	H. Dai, E. B. Khalil, Y. Zhang, B. Dilkina, and Le Song, “Learning Combinatorial Optimization Algorithms over Graphs,” arXiv. pp. 1–28, 04-May-2017.
+- [8]	A. Phadtare, A. Bahmani, A. Shah, and R. Pietrobon, “Scientific writing: a randomized controlled trial comparing standard and on-line instruction,” BMC Medical Education, vol. 9, no. 1, p. 27, May 2009.
 
