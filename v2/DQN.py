@@ -71,13 +71,15 @@ class DQN(object):
 #        model.add(Dense(self.output_size, activation="linear"))
         
         gmodel = Sequential()
-        gmodel.add(Conv1D(self.train_batch//2 , 5,border_mode="valid",input_shape=self.input_size))
+        gmodel.add(Conv1D(64 , 5,border_mode="valid",input_shape=self.input_size))
         gmodel.add(MaxPooling1D(pool_length=2, border_mode="valid"))
         gmodel.add(Dropout(0.3))
+        gmodel.add(Conv1D(128 , 5,border_mode="valid"))
+        gmodel.add(Dropout(0.3))
         gmodel.add(Flatten())
-        
         vmodel = Sequential()
         vmodel.add(Dense(100, input_shape=(self.output_size,),activation="relu"))
+        vmodel.add(Dense(100, activation="relu"))
         vmodel.add(Dense(100, activation="relu"))
         
         model = Sequential()
@@ -141,15 +143,15 @@ class DQN(object):
 #MAXVERTEXNUM = 50
 #agent = DQN(MAXVERTEXNUM)
 #for i in range(32):
-#    agent.remember([np.random.random([1,MAXVERTEXNUM,MAXVERTEXNUM]),np.random.random([MAXVERTEXNUM])],
+#    agent.remember([np.random.random([1,MAXVERTEXNUM,MAXVERTEXNUM]),np.random.random([1,MAXVERTEXNUM])],
 #                   np.random.random([MAXVERTEXNUM]),
 #                   np.random.random(),
-#                   [np.random.random([1,MAXVERTEXNUM,MAXVERTEXNUM]),np.random.random([MAXVERTEXNUM])],
+#                   [np.random.random([1,MAXVERTEXNUM,MAXVERTEXNUM]),np.random.random([1,MAXVERTEXNUM])],
 #                   random.sample([True,False],1),
 #                   np.random.random([MAXVERTEXNUM]),
 #                   )
 #
 #agent.train()  
 #agent.predict_action(np.random.random([1,MAXVERTEXNUM,MAXVERTEXNUM]))
-#
-#
+
+

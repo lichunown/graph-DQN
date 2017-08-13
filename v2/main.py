@@ -46,8 +46,9 @@ for g in range(GRAPHTYPE):
         lastreward = 0  
         for times in range(MAXTIMES):
             action = agent.act(state)
-            action.reshape([1,MAXVERTEXNUM])
+            action.reshape([1,MAXVERTEXNUM])          
             next_state,reward_pre,done,info = env.act(action)
+            t = 0
             reward = reward_pre
             #reward = 10 if reward_pre>=lastreward else -1 # TODO change reward
             if reward_pre > maxValue:
@@ -69,5 +70,5 @@ for g in range(GRAPHTYPE):
                 else:
                     print('{}|[G]:{}/{}   [EPISODES]:{}/{}   [times]:{}/{}   [max_reward]:{}   [reward_pre]:{}   [temp]:{:.2f}   [epsilon]:{:.2f}'\
                       .format(i,g+1,GRAPHTYPE,e+1,EPISODES,times+1,MAXTIMES,maxValue,reward_pre,                  \
-                       action[agent._findMaxIndex(action,info)],agent.epsilon))                       
+                       t,agent.epsilon))                       
                 break
