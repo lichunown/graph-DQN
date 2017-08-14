@@ -186,6 +186,7 @@ class GraphEnv(Graph):
             i += 1
             if i%50==0:
                 print('running initMaxValue: i:{}/{:d}   maxValue={}'.format(i,iternum,self.maxValue))
+        print('running initMaxValue: i:{}/{:d}   maxValue={}'.format(i,iternum,self.maxValue))
         return (self.maxValue,self.maxValue_Vertex)
     @property
     def reward_pre(self):# TODO 算法准确率太低,尝试寻找新的算法解决
