@@ -5,9 +5,9 @@ from graph import GraphEnv
 from DQN import DQN,DQN_test
 
 
-MAXVERTEXNUM = 5
-VERTEXNUM = 5
-SELECTNUM = 2
+MAXVERTEXNUM = 10
+VERTEXNUM = 10
+SELECTNUM = 3
 
 
 env = GraphEnv(VERTEXNUM,SELECTNUM,MAXVERTEXNUM)
@@ -74,7 +74,6 @@ for g in range(GRAPHTYPE):
             action.reshape([1,MAXVERTEXNUM])          
             next_state,reward_pre,done,info = env.act(action)
             reward = reward_pre
-            #reward = 10 if reward_pre>=lastreward else -1 # TODO change reward
             if reward_pre > maxValue:
                 maxValue = reward_pre
                 maxValue_Vertex = env.selectVertex
@@ -82,6 +81,7 @@ for g in range(GRAPHTYPE):
             agent.remember(state,action,reward,next_state,done,info)
             state = next_state
             i += 1
+            agent.train()
             if i % traintimes==0:
                 agent.train()
             if i % savetimes==0:          

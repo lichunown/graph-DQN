@@ -29,7 +29,7 @@ class DQN(object):
         self.input_size = (MAXVERTEX,MAXVERTEX)
         self.output_size = MAXVERTEX
         self.memory = deque(maxlen=3000)
-        self.gamma = 1    # discount rate
+        self.gamma = 0.9    # discount rate
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.998
