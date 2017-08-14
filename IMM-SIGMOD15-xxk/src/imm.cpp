@@ -42,7 +42,7 @@ void Run(int argn, char **argv)
             return ;
         }
         if (argv[i] == string("-dataset")) 
-            arg.dataset = argv[i + 1];
+            arg.dataset = argv[i + 1];  //形参列表的下一个参数输入到dataset
         if (argv[i] == string("-epsilon")) 
             arg.epsilon = atof(argv[i + 1]);
         if (argv[i] == string("-T")) 
@@ -52,7 +52,7 @@ void Run(int argn, char **argv)
         if (argv[i] == string("-model"))
             arg.model = argv[i + 1];
     }
-    ASSERT(arg.dataset != "");
+    ASSERT(arg.dataset != "");  //判断为假时抛出异常
     ASSERT(arg.model == "IC" || arg.model == "LT" || arg.model == "TR" || arg.model=="CONT");
 
     string graph_file;
