@@ -2,22 +2,47 @@
 
 import numpy as np
 from graph import GraphEnv
-from DQN import DQN
+from DQN import DQN,DQN_test
 
 
-MAXVERTEXNUM = 15
-VERTEXNUM = 15
-SELECTNUM = 7
+MAXVERTEXNUM = 5
+VERTEXNUM = 5
+SELECTNUM = 2
 
 
 env = GraphEnv(VERTEXNUM,SELECTNUM,MAXVERTEXNUM)
 
-#env.load('test')
-#env.random(valuefun = lambda x:0.2)
+
+
+#agent = DQN_test(MAXVERTEXNUM)
+#
+#MAXTIMES = SELECTNUM
+#EPISODES = int(np.ceil(32/MAXTIMES))
 #env.random(valuefun = np.random.random)
+#
+#for e in range(EPISODES):
+#    state = env.reset()
+#    lastreward = 0  
+#    for times in range(MAXTIMES):
+#        action = agent.act(state)
+#        action.reshape([1,MAXVERTEXNUM])          
+#        next_state,reward_pre,done,info = env.act(action)
+#        reward = reward_pre
+#        lastreward = reward_pre
+#        agent.remember(state,action,reward,next_state,done,info)
+#        state = next_state
+#agent.train()
 
-agent = DQN(MAXVERTEXNUM)
 
+
+
+
+
+
+
+
+
+agent = DQN_test(MAXVERTEXNUM)
 try:
     agent.loadWeight('outmodel')
     print('[Message] load weight')
@@ -48,7 +73,6 @@ for g in range(GRAPHTYPE):
             action = agent.act(state)
             action.reshape([1,MAXVERTEXNUM])          
             next_state,reward_pre,done,info = env.act(action)
-            t = 0
             reward = reward_pre
             #reward = 10 if reward_pre>=lastreward else -1 # TODO change reward
             if reward_pre > maxValue:
@@ -68,7 +92,8 @@ for g in range(GRAPHTYPE):
                       .format(i,g+1,GRAPHTYPE,e+1,EPISODES,times+1,MAXTIMES,expect,maxValue,reward_pre,                  \
                        action[agent._findMaxIndex(action,info)],agent.epsilon))       
                 else:
-                    print('{}|[G]:{}/{}   [EPISODES]:{}/{}   [times]:{}/{}   [max_reward]:{}   [reward_pre]:{}   [temp]:{:.2f}   [epsilon]:{:.2f}'\
+                    print('{}|[G]:{}/{}   [EPISODES]:{}/{}   [times]:{}/{}   [max_reward]:{}   [reward_pre]:{}   [epsilon]:{:.2f}'\
                       .format(i,g+1,GRAPHTYPE,e+1,EPISODES,times+1,MAXTIMES,maxValue,reward_pre,                  \
-                       t,agent.epsilon))                       
+                       agent.epsilon))                       
                 break
+                
