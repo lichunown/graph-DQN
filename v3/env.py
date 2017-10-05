@@ -77,7 +77,7 @@ class GraphEnv(Graph):
             r = np.zeros(self.n)
             r[list(self.selectset)] = 1
         else:
-            r = -1*np.ones(self.n)
+            r = -1*np.ones(maxsize)
             r[list(self.selectset)] = 1
             r[list(self.notselectset)] = 0
         return r
@@ -100,11 +100,11 @@ class GraphEnv(Graph):
     
     def act(self,action:int,maxsize=None):
         self.select(action)
-        return self.state(self.MAXN),self.reward,self.done,self.selectVertex(self.MAXN)
+        return self.state(self.MAXN),self.reward,self.done
     
 
     def state(self,maxsize = None):
-        return self.selectVertex(maxsize),self.out()
+        return self.selectVertex(maxsize),self.out(maxsize)
     
     @property
     def reward(self):
@@ -145,7 +145,7 @@ class GraphEnv(Graph):
             result += len(tempset)       
         return result/self.REWARDRUNTIMES            
             
-a = GraphEnv(10,maxSelectNum = 2)
+a = GraphEnv(10,maxSelectNum = 2,MAXN = 11)
 a.select_list(range(1))
 
 #a = nx.barabasi_albert_graph(10,5)
