@@ -111,14 +111,14 @@ class GraphEnv(Graph):
         return self.reward_pre2
     
     @property
-    def done(self) -> bool:# TODO 如果运行结果比其他算法的最优解好，则done
+    def done(self) -> bool:
         return len(self.selectset) == self.MAXSELECTNUM
     
     def initMaxValue(self):# TODO 调用其他的已知算法，求得大约的最优解
         pass
     
     @property
-    def reward_pre(self):# TODO 算法准确率太低,尝试寻找新的算法解决
+    def reward_pre(self):# deleted old algorithm
         result = 0
         for i in range(self.REWARDRUNTIMES):
             selectVer = self.selectVertex().reshape([self.n,1])
@@ -128,7 +128,7 @@ class GraphEnv(Graph):
         return result/self.REWARDRUNTIMES
     
     @property
-    def reward_pre2(self):
+    def reward_pre2(self):# TODO Time is too long
         result = 0
         for i in range(self.REWARDRUNTIMES):
             temp = self.graph.copy()
