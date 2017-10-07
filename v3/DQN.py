@@ -39,6 +39,8 @@ class DQN(object):
     def epsilondecay(self):
         if self.epsilon > self.epsilon_min:
             self.epsilon -= (1-self.epsilon_min)/(self.MAXN*self.MAXN/self.train_batch)
+        else:
+            self.epsilon = self.epsilon_min
         
     @property
     def model(self):
@@ -80,12 +82,13 @@ class DQN(object):
         if len(self.memory)>=self.train_batch:
             minibatch = random.sample(self.memory,self.train_batch) 
             for state,action_onehot,reward,next_state,done in minibatch:
-                target = reward if done else (reward + self.gamma * self.predict_action_value(next_state))             
+                target = reward #if done else (reward + self.gamma * self.predict_action_value(next_state))             
                 target_f = self.predict_action_onehot(state)
                 action = np.argmax(action_onehot)
-#                print(target_f,action)
-                target_f[action] = target                
-                self.model.fit(self.reshapeState(state), target_f.reshape([1,len(target_f)]), epochs=1, verbose=0)
+                target_f[action] = target        
+                print("train  reward:{} target:{}".format(reward,target))
+                self.model.fit(self.reshapeState(state), target_f.reshape([1,len(target_f)]), epochs=100, verbose=0)
+                print("trained  predict:{} pre_action:{}".format(self.predict_action_value(state),self.predict_action_onehot(state)[action]))
             self.epsilondecay()
 
     
@@ -101,16 +104,21 @@ class DQN(object):
         enableselect[np.where(state[0]==0)[0]] = 1
         action = np.argmax(act_onehot*enableselect)
         if act_onehot[action]==0:
-            raise('Best reward of selection is 0. ({})'.format(act_onehot))
+            act_onehot[np.where(act_onehot==0)[0]] = min(act_onehot)
+            action = np.argmax(act_onehot)
+#            raise ValueError('Best reward of selection is 0. ({})'.format(act_onehot))
         return act_onehot[action]       
     
     def predict_action(self,state):
         act_onehot = self.predict_action_onehot(state)
         enableselect = np.zeros(len(state[0]))
         enableselect[np.where(state[0]==0)[0]] = 1
-        action = np.argmax(act_onehot*enableselect)
+        act_onehot = act_onehot*enableselect
+        action = np.argmax(act_onehot)
         if act_onehot[action]==0:
-            raise('Best reward of selection is 0. ({})'.format(act_onehot))
+            act_onehot[np.where(act_onehot==0)[0]] = min(act_onehot)
+            action = np.argmax(act_onehot)
+#            print('[Warning] Best reward of selection is 0.')
         return action
     
     def act(self,state):# 执行的动作，具有随机性
