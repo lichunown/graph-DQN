@@ -99,8 +99,12 @@ class GraphEnv(Graph):
     
     
     def act(self,action:int,maxsize=None):
+        state = self.state(self.MAXN)
         self.select(action)
-        return self.state(self.MAXN),self.reward,self.done
+        action_onehot = -1 * np.ones(self.MAXN)
+        action_onehot[0:self.n] = 0
+        action_onehot[action] = 1
+        return state,action_onehot,self.reward,self.state(self.MAXN),self.done
     
 
     def state(self,maxsize = None):
