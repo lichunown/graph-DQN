@@ -151,7 +151,7 @@ class GraphEnv(Graph):
             
 a = GraphEnv(10,maxSelectNum = 2,MAXN = 11)
 a.select_list(range(1))
-
+state,action_onehot,reward,next_state,done = a.act(1)
 #a = nx.barabasi_albert_graph(10,5)
 #
 #temp = a.copy()

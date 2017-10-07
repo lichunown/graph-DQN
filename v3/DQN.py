@@ -15,7 +15,7 @@ from keras.optimizers import Adam
 import os
 from keras.models import load_model
 from keras import backend as K
-from graph import GraphEnv
+from env import GraphEnv
 
 
 '''
@@ -45,7 +45,7 @@ class DQN(object):
     def model(self):
         return self._model
     
-    def createLSTMModel(self):# 定义训练模型
+    def createLSTMModel(self):# TODO 定义训练模型
         gm = Sequential()
         gm.add(LSTM(32, return_sequences=True,input_shape=(200,400)))
         gm.add(Dropout(0.3))
@@ -79,25 +79,30 @@ class DQN(object):
         if len(self.memory)>=self.train_batch:
             minibatch = random.sample(self.memory,self.train_batch) 
             for state,action,reward,next_state,done in minibatch:
-                target = reward
-                if not done:
-                    target = (reward + self.gamma *np.amax(self.model.predict(next_state)[0]))                
+                target = reward if done else (reward + self.gamma * self.predict_action(next_state)[1])             
                 target_f = self.model.predict(state)
                 target_f[0][action] = target                
                 self.model.fit(state, target_f, epochs=1, verbose=0)
-            if self.epsilon > self.epsilon_min:
-                self.epsilon *= self.epsilon_decay
             self.epsilondecay()
 
 
+    def predict_action_onehot(self,state):
+        return self.model.predict(state)[0]
+
     def predict_action(self,state):
-        return self.model.predict(state)
+        act_onehot = self.predict_action_onehot(state)
+        enableselect = np.zeros(len(state[0]))
+        enableselect[np.where(state[0]==0)[0]] = 1
+        action = np.argmax(act_onehot*enableselect)
+        if act_onehot[action]==0:
+            raise('Best reward of selection is 0. ({})'.format(act_onehot))
+        return action,act_onehot[action]
     
     def act(self,state):# 执行的动作，具有随机性
         if random.random() < self.epsilon:
             return np.random.random(self.MAXN)
         else:
-            return self.predict_action(state)[0]
+            return self.predict_action(state)
         
     def remember(self,state,action,reward,next_state,done):
         self.memory.append((state,action,reward,next_state,done))
