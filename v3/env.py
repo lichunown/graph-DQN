@@ -69,7 +69,7 @@ class GraphEnv(Graph):
         if MAXN:
             assert MAXN >= n
         self.MAXN = MAXN if MAXN else None     
-        self.REWARDRUNTIMES = 233
+        self.REWARDRUNTIMES = 1001
         self.casRate = 0.5
         assert maxSelectNum <= self.n
     def selectVertex(self,maxsize = None):# 选中的顶点

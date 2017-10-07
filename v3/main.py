@@ -9,10 +9,10 @@ from DQN import DQN
 
 MAXE = 50
 
-agent = DQN(MAXVERTEX = 50)
+
 
 for e in range(MAXE):
-    env = GraphEnv(n=10,m=2,s2vlength=100,maxSelectNum=3,MAXN = 50)
+    env = GraphEnv(n=10,m=2,s2vlength=100,maxSelectNum=3,MAXN = 10)
     state = env.reset()
     times = 0
     lastreward = 0
@@ -20,7 +20,7 @@ for e in range(MAXE):
         times += 1 
         action = agent.act(state)
         state,action_onehot,reward,next_state,done = env.act(action)
-        agent.remember(state,action_onehot,reward,next_state,done)
+        agent.remember(state,action_onehot,reward/10,next_state,done)
         state = next_state
         lastreward = reward
         agent.train()
