@@ -96,7 +96,7 @@ class GraphEnv(Graph):
     def reset(self):# 重置，为0
         self.selectset = set()
         self.notselectset = set(self.graph.nodes)
-    
+        return self.state
     
     def act(self,action:int,maxsize=None):
         state = self.state(self.MAXN)
@@ -149,6 +149,8 @@ class GraphEnv(Graph):
             result += len(tempset)       
         return result/self.REWARDRUNTIMES            
             
+    
+    
 a = GraphEnv(10,maxSelectNum = 2,MAXN = 11)
 a.select_list(range(1))
 state,action_onehot,reward,next_state,done = a.act(1)

@@ -15,7 +15,6 @@ from keras.optimizers import Adam
 import os
 from keras.models import load_model
 from keras import backend as K
-from env import GraphEnv
 
 
 '''
@@ -100,7 +99,7 @@ class DQN(object):
     
     def act(self,state):# 执行的动作，具有随机性
         if random.random() < self.epsilon:
-            return np.random.random(self.MAXN)
+            return random.sample(list(np.where(state[0]==0)[0]),1)[0]
         else:
             return self.predict_action(state)
         
