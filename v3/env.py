@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-import cplex,random
+import random
 from itertools import combinations
 #from scipy.special import comb
 import networkx as nx
@@ -96,7 +96,7 @@ class GraphEnv(Graph):
     def reset(self):# 重置，为0
         self.selectset = set()
         self.notselectset = set(self.graph.nodes)
-        return self.state
+        return self.state(self.MAXN)
     
     def act(self,action:int,maxsize=None):
         state = self.state(self.MAXN)

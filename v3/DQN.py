@@ -4,7 +4,7 @@
 
 
 #from DQN_cart import DQN
-import time
+
 import random
 import numpy as np
 from collections import deque
@@ -46,7 +46,7 @@ class DQN(object):
     
     def createLSTMModel(self):# TODO 定义训练模型
         gm = Sequential()
-        gm.add(LSTM(32, return_sequences=True,input_shape=(200,400)))
+        gm.add(LSTM(32, return_sequences=True,input_shape=(self.MAXN,self.MAXN)))
         gm.add(Dropout(0.3))
         gm.add(Conv1D(64, 5, border_mode="valid"))
         gm.add(MaxPooling1D(pool_length=2, border_mode="valid"))
@@ -55,10 +55,11 @@ class DQN(object):
         gm.add(MaxPooling1D(pool_length=2, border_mode="valid"))
         gm.add(Dropout(0.3))
         gm.add(Flatten())
+        gm.summary()
         sm = Sequential()
         sm.add(Dense(128, input_shape=(self.MAXN,),activation="relu"))
         sm.add(Dense(256,activation="relu"))
-
+        sm.summary()
         _model = Sequential()
         _model.add(Merge([sm, gm], mode="concat", concat_axis=-1))
         _model.add(Dense(256,activation="relu"))
@@ -66,6 +67,7 @@ class DQN(object):
         _model.add(Dense(512,activation="linear"))
         _model.add(Dense(self.MAXN, activation="linear"))
         _model.compile(optimizer="adam", loss='categorical_crossentropy',metrics=["accuracy"])
+        _model.summary()
         return _model    
  
     
@@ -77,17 +79,31 @@ class DQN(object):
     def train(self):# TODO
         if len(self.memory)>=self.train_batch:
             minibatch = random.sample(self.memory,self.train_batch) 
-            for state,action,reward,next_state,done in minibatch:
-                target = reward if done else (reward + self.gamma * self.predict_action(next_state)[1])             
-                target_f = self.model.predict(state)
-                target_f[0][action] = target                
-                self.model.fit(state, target_f, epochs=1, verbose=0)
+            for state,action_onehot,reward,next_state,done in minibatch:
+                target = reward if done else (reward + self.gamma * self.predict_action_value(next_state))             
+                target_f = self.predict_action_onehot(state)
+                action = np.argmax(action_onehot)
+#                print(target_f,action)
+                target_f[action] = target                
+                self.model.fit(self.reshapeState(state), target_f.reshape([1,len(target_f)]), epochs=1, verbose=0)
             self.epsilondecay()
 
-
+    
+    def reshapeState(self,state):
+        return [state[0].reshape([1,len(state[0])]),state[1].reshape([1,state[1].shape[0],state[1].shape[1]])]
+    
     def predict_action_onehot(self,state):
-        return self.model.predict(state)[0]
-
+        return self.model.predict(self.reshapeState(state))[0]
+    
+    def predict_action_value(self,state):
+        act_onehot = self.predict_action_onehot(state)
+        enableselect = np.zeros(len(state[0]))
+        enableselect[np.where(state[0]==0)[0]] = 1
+        action = np.argmax(act_onehot*enableselect)
+        if act_onehot[action]==0:
+            raise('Best reward of selection is 0. ({})'.format(act_onehot))
+        return act_onehot[action]       
+    
     def predict_action(self,state):
         act_onehot = self.predict_action_onehot(state)
         enableselect = np.zeros(len(state[0]))
@@ -95,7 +111,7 @@ class DQN(object):
         action = np.argmax(act_onehot*enableselect)
         if act_onehot[action]==0:
             raise('Best reward of selection is 0. ({})'.format(act_onehot))
-        return action,act_onehot[action]
+        return action
     
     def act(self,state):# 执行的动作，具有随机性
         if random.random() < self.epsilon:
