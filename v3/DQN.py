@@ -25,10 +25,10 @@ output_size:[self.MAXVERTEX]
 
 '''
 class DQN(object):
-    def __init__(self,MAXVERTEX):
-        self.MAXN = MAXVERTEX
+    def __init__(self,MAXN):
+        self.MAXN = MAXN
         self.memory = deque(maxlen=10000)
-        self.gamma = 0.9    # discount rate
+        self.gamma = 1    # discount rate
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.998
@@ -86,7 +86,7 @@ class DQN(object):
         _model.add(Dense(256,activation="linear"))
         _model.add(Dense(512,activation="linear"))
         _model.add(Dense(self.MAXN, activation="linear"))
-        _model.compile(optimizer="RMSprop", loss='mse',metrics=["accuracy"])        
+        _model.compile(optimizer="RMSprop", loss='mse')        
         
         return _model    
  
@@ -100,7 +100,7 @@ class DQN(object):
         if len(self.memory)>=self.train_batch:
             minibatch = random.sample(self.memory,self.train_batch) 
             for state,action_onehot,reward,next_state,done in minibatch:
-                target = reward #if done else (reward + self.gamma * self.predict_action_value(next_state))             
+                target = reward if done else (reward + self.gamma * self.predict_action_value(next_state))             
                 target_f = self.predict_action_onehot(state)
                 action = np.argmax(action_onehot)
                 target_f[action] = target    
