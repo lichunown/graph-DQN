@@ -1,3 +1,6 @@
 __pycache__/
 *.weight
 *.pdf
+temp/*
+.DS_Store
+

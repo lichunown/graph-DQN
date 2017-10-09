@@ -4,9 +4,10 @@ import random
 from itertools import combinations
 #from scipy.special import comb
 import networkx as nx
+from s2v import s2v
 
 class Graph(object):
-    def __init__(self,n = 10,m = 2,s2vlength = None):
+    def __init__(self,n = 10,m = 2,s2vlength = 100):
         self._graph = nx.barabasi_albert_graph(n,m)
         self.n = n
         self.m = m
@@ -19,8 +20,8 @@ class Graph(object):
         nx.draw(self.graph)
         
     def out(self,maxsize=None):
-#        return self.s2v()
-        return self.out_array(maxsize)
+        return self.s2v()
+#        return self.out_array(maxsize)
     
     def out_array(self,maxsize = None):
         if not maxsize:
@@ -42,7 +43,9 @@ class Graph(object):
         pass
     
     def s2v(self):
-        pass
+        if not self.s2vData:
+            self.s2vData = s2v(self.graph.edges)
+        return self.s2vData
     
     @property
     def edges(self):
@@ -82,7 +85,7 @@ class GraphEnv(Graph):
             r[list(self.notselectset)] = 0
         return r
     
-    def select(self,num:int):
+    def select(self,num):
         assert num < self.n
         assert num in self.notselectset
         assert len(self.selectset) <= self.MAXSELECTNUM
@@ -98,7 +101,7 @@ class GraphEnv(Graph):
         self.notselectset = set(self.graph.nodes)
         return self.state(self.MAXN)
     
-    def act(self,action:int,maxsize=None):
+    def act(self,action,maxsize=None):
         state = self.state(self.MAXN)
         self.select(action)
         action_onehot = -1 * np.ones(self.MAXN)
@@ -115,7 +118,7 @@ class GraphEnv(Graph):
         return self.reward_pre2
     
     @property
-    def done(self) -> bool:
+    def done(self):
         return len(self.selectset) == self.MAXSELECTNUM
     
     def initMaxValue(self):# TODO 调用其他的已知算法，求得大约的最优解
