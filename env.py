@@ -22,7 +22,7 @@ class Graph(object):
         nx.draw(self.graph)
         
     def out(self,maxsize=None):
-        return self.s2v()
+        return self.s2v(maxsize=None)
 #        return self.out_array(maxsize)
     
     def out_array(self,maxsize = None):
@@ -44,10 +44,13 @@ class Graph(object):
     def load(self,filename):
         pass
     
-    def s2v(self):
+    def s2v(self,maxsize = None):
         if not self.s2vData:
             self.s2vData = s2v(self.edges)
-        return self.s2vData
+        if not maxsize:
+            return self.s2vData
+        else:
+            return 
     
     @property
     def edges(self):

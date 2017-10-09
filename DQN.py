@@ -47,9 +47,9 @@ class DQN(object):
         return self._model
     
     def createLSTMModel(self):# TODO 定义训练模型
-        '''
+        
         gm = Sequential()
-        gm.add(LSTM(32, return_sequences=True,input_shape=(self.MAXN,self.MAXN)))
+        gm.add(LSTM(32, return_sequences=True,input_shape=(self.MAXN,100)))
         gm.add(Dropout(0.3))
         gm.add(Conv1D(64, 5, border_mode="valid"))
         gm.add(MaxPooling1D(pool_length=2, border_mode="valid"))
@@ -87,7 +87,7 @@ class DQN(object):
         _model.add(Dense(512,activation="linear"))
         _model.add(Dense(self.MAXN, activation="linear"))
         _model.compile(optimizer="RMSprop", loss='mse')        
-        
+        '''
         return _model    
  
     
