@@ -24,9 +24,11 @@ def readVec(filename):
     f = open(filename,'r')
     msg = f.readline()
     n,m = msg.split()[0],msg.split()[1]
-    result = np.zeros([n,m])
+    print(n,m)
+    result = np.zeros([int(n),int(m)])
     for i,H in enumerate(f):
-        result[i,:] = np.array(H.split())
+#        print(i,H)
+        result[i,:] = np.array([float(num) for num in H.split()[1:]])
     f.close()
     return result
 

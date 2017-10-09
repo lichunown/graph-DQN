@@ -2,6 +2,7 @@
 import numpy as np
 import random
 from itertools import combinations
+
 #from scipy.special import comb
 import networkx as nx
 from s2v import s2v
@@ -12,6 +13,7 @@ class Graph(object):
         self.n = n
         self.m = m
         self.s2vlength = s2vlength
+        self.s2vData = None
     @property
     def graph(self):
         return self._graph
@@ -44,15 +46,15 @@ class Graph(object):
     
     def s2v(self):
         if not self.s2vData:
-            self.s2vData = s2v(self.graph.edges)
+            self.s2vData = s2v(self.edges)
         return self.s2vData
     
     @property
     def edges(self):
-        return self.graph.edges
+        return self.graph.edges()
     @property
     def nodes(self):
-        return self.graph.nodes
+        return self.graph.nodes()
     
     def __str__(self):
         return str(self.graph.__str__())
@@ -67,7 +69,7 @@ class GraphEnv(Graph):
     def __init__(self,n = 10,m = 2,s2vlength = 100,maxSelectNum = 5,MAXN = None):
         super(GraphEnv,self).__init__(n,m,s2vlength)      
         self.selectset = set()
-        self.notselectset = set(self.graph.nodes)
+        self.notselectset = set(self.nodes)
         self.MAXSELECTNUM = maxSelectNum
         if MAXN:
             assert MAXN >= n
