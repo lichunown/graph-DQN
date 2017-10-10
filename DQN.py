@@ -25,7 +25,7 @@ output_size:[self.MAXVERTEX]
 
 '''
 class DQN(object):
-    def __init__(self,MAXN):
+    def __init__(self,MAXN,s2vlength=100):
         self.MAXN = MAXN
         self.memory = deque(maxlen=10000)
         self.gamma = 1    # discount rate
@@ -34,6 +34,7 @@ class DQN(object):
         self.epsilon_decay = 0.998
         self.learning_rate = 0.001
         self.train_batch = 32
+        self.s2vlength = s2vlength
         self._model = self.createLSTMModel()
     
     def epsilondecay(self):
@@ -47,9 +48,8 @@ class DQN(object):
         return self._model
     
     def createLSTMModel(self):# TODO 定义训练模型
-        
         gm = Sequential()
-        gm.add(LSTM(32, return_sequences=True,input_shape=(self.MAXN,100)))
+        gm.add(LSTM(32, return_sequences=True,input_shape=(self.MAXN,self.s2vlength)))
         gm.add(Dropout(0.3))
         gm.add(Conv1D(64, 5, border_mode="valid"))
         gm.add(MaxPooling1D(pool_length=2, border_mode="valid"))
@@ -69,7 +69,7 @@ class DQN(object):
         _model.add(Dense(256,activation="linear"))
         _model.add(Dense(512,activation="linear"))
         _model.add(Dense(self.MAXN, activation="linear"))
-        _model.compile(optimizer="adam", loss='categorical_crossentropy',metrics=["accuracy"])
+        _model.compile(optimizer="RMSprop", loss='mse')
         _model.summary()
         '''
         gm = Sequential()

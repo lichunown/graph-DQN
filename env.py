@@ -46,11 +46,14 @@ class Graph(object):
     
     def s2v(self,maxsize = None):
         if not self.s2vData:
-            self.s2vData = s2v(self.edges)
+            self.s2vData = s2v(self.edges,self.s2vlength)
         if not maxsize:
             return self.s2vData
         else:
-            return 
+            assert maxsize >= self.n
+            r = np.zeros([maxsize,self.s2vlength])
+            r[:self.n,:] = self.s2vData
+            return r
     
     @property
     def edges(self):
@@ -60,9 +63,9 @@ class Graph(object):
         return self.graph.nodes()
     
     def __str__(self):
-        return str(self.graph.__str__())
+        return str('myGraph From: '+self.graph.__str__())
     def __repr__(self):
-        return str(self.graph.__repr__())
+        return str('myGraph From: '+self.graph.__repr__())
     def __len__(self):
         return self.graph.__len__()
 

@@ -1,10 +1,13 @@
 #encoding:utf-8
 
-import sys,os
+import os
 import numpy as np
 
 def getTempFileNum():
     num = 0
+    if not os.path.exists('temp/'):
+        os.mkdir('temp')
+        return 0
     tmpfiles = os.listdir('temp/')
     for name in tmpfiles:
         try:
@@ -32,10 +35,10 @@ def readVec(filename):
     f.close()
     return result
 
-def s2v(edges):
+def s2v(edges,s2vlength = 100):
     tempnum = getTempFileNum()
     writeEdges(edges,'temp/%d.edges'%tempnum)
-    os.system('./runs2v.sh temp/%d.edges temp/%d.s2v'%(tempnum,tempnum))
+    os.system('./runs2v.sh temp/%d.edges temp/%d.s2v %d'%(tempnum,tempnum,s2vlength))
     return readVec('temp/%d.s2v'%tempnum)
     
 
