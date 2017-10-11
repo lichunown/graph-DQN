@@ -30,7 +30,11 @@ for gtimes in range(GRAN):
             times += 1 
             action = agent.act(state)
             state,action_onehot,reward,next_state,done = env.act(action)
-            agent.remember(state,action_onehot,reward - lastreward,next_state,done)
+            if lastreward==0:
+                reward = reward/10
+            else:
+                reward = reward - lastreward
+            agent.remember(state, action_onehot, reward, next_state, done)
             state = next_state
             lastreward = reward # TODO hhh
             agent.train()

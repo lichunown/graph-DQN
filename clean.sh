@@ -1,2 +1,2 @@
 rm temp/*
-rm models/
+rm models/*
