@@ -85,8 +85,6 @@ class DQN(object):
         return _model    
  
     
-    
-    
     def _findMaxIndex(self,r,info):
         return np.where(r*info!=0)[0][np.argmax((r*info)[np.where(r*info!=0)])]
     
@@ -155,6 +153,8 @@ class DQN(object):
         self.model.save_weights(name+'.weight')
     def loadWeight(self,name = 'models/test'):
         self.model.load_weights(name+'.weight')
+    def clear_session(self):
+        K.clear_session()
 
 
 

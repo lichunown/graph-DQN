@@ -11,6 +11,11 @@ MAXE = 20
 GRAN = 50
 agent = DQN(MAXN = 50)
 
+try:
+    agent.loadWeight()
+except Exception:
+    pass
+
 for gtimes in range(GRAN):
     env = GraphEnv(n=20,m=2,s2vlength=100,maxSelectNum=5,MAXN = 50)
     for e in range(MAXE):
@@ -33,4 +38,5 @@ for gtimes in range(GRAN):
                                                   times,reward,agent.epsilon,
                                                   agent.predict_action_value(state)))
                 break
+    agent.saveWeight()
     
