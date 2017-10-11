@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import os
 
 from env import GraphEnv
 from DQN import DQN
 
+
+if not os.path.exists('models/'):
+    os.mkdir('models')
 
 
 MAXE = 20
