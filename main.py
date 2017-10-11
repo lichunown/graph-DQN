@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import os
 
 from env import GraphEnv
 from DQN import DQN
 
 
+if not os.path.exists('models/'):
+    os.mkdir('models')
+
 
 MAXE = 20
 GRAN = 50
-agent = DQN(MAXN = 50)
+agent = DQN(MAXN = 50,s2vlength=100)
 
 try:
     agent.loadWeight()
@@ -28,7 +32,7 @@ for gtimes in range(GRAN):
             state,action_onehot,reward,next_state,done = env.act(action)
             agent.remember(state,action_onehot,reward - lastreward,next_state,done)
             state = next_state
-            lastreward = reward
+            lastreward = reward # TODO hhh
             agent.train()
 #            print("g:{}/{} e:{}/{}  times:{}  reward:{:.2}  epsilon:{:.2}  predict:{:.2}".format(gtimes,GRAN,e,MAXE,
 #                                                  times,reward,agent.epsilon,

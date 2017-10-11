@@ -63,7 +63,7 @@ class DQN(object):
         _model.add(Dense(256,activation="linear"))
         _model.add(Dense(512,activation="linear"))
         _model.add(Dense(self.MAXN, activation="linear"))
-        _model.compile(optimizer="RMSprop", loss='mse')
+        _model.compile(optimizer="RMSprop", loss='mse') # TODO change
         _model.summary()
         '''
         gm = Sequential()
@@ -125,7 +125,7 @@ class DQN(object):
     
     def predict_action(self,state):
         act_onehot = self.predict_action_onehot(state)
-        enableselect = np.zeros(len(state[0]))
+        enableselect = np.zeros(len(state[0]))          # state 
         enableselect[np.where(state[0]==0)[0]] = 1
         act_onehot = act_onehot*enableselect
         action = np.argmax(act_onehot)
