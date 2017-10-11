@@ -1,0 +1,2 @@
+rm temp/*
+rm models/

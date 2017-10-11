@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# -*- coding: utf-8 -*-
-
-
-#from DQN_cart import DQN
-
 import random
 import numpy as np
 from collections import deque
@@ -12,7 +7,6 @@ from keras.models import Sequential
 from keras.layers import Dense,Conv1D,LSTM,MaxPooling1D, Dropout, Flatten,Merge
 from keras.layers.embeddings import Embedding
 from keras.optimizers import Adam
-import os
 from keras.models import load_model
 from keras import backend as K
 

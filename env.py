@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import random
-from itertools import combinations
 
 #from scipy.special import comb
 import networkx as nx
@@ -22,7 +21,7 @@ class Graph(object):
         nx.draw(self.graph)
         
     def out(self,maxsize=None):
-        return self.s2v(maxsize=None)
+        return self.s2v(maxsize)
 #        return self.out_array(maxsize)
     
     def out_array(self,maxsize = None):
@@ -45,7 +44,7 @@ class Graph(object):
         pass
     
     def s2v(self,maxsize = None):
-        if not self.s2vData:
+        if isinstance(self.s2vData,type(None)):
             self.s2vData = s2v(self.edges,self.s2vlength)
         if not maxsize:
             return self.s2vData
@@ -106,10 +105,10 @@ class GraphEnv(Graph):
             
     def reset(self):# 重置，为0
         self.selectset = set()
-        self.notselectset = set(self.graph.nodes)
+        self.notselectset = set(self.nodes)
         return self.state(self.MAXN)
     
-    def act(self,action,maxsize=None):
+    def act(self,action):
         state = self.state(self.MAXN)
         self.select(action)
         action_onehot = -1 * np.ones(self.MAXN)
@@ -147,7 +146,7 @@ class GraphEnv(Graph):
         result = 0
         for i in range(self.REWARDRUNTIMES):
             temp = self.graph.copy()
-            for edge in self.graph.edges:
+            for edge in self.edges:
                 if self.casRate < random.random():
                     temp.remove_edge(edge[0],edge[1])
             tempset = set()          
