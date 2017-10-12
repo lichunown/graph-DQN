@@ -9,13 +9,16 @@ import time
 
 TEST = True
 
+
+
 class Graph(object):
+    global TEST
     def __init__(self,n = 10,m = 2,s2vlength = 100):
         self._graph = nx.barabasi_albert_graph(n,m)
         self.n = n
         self.m = m
         self.s2vlength = s2vlength
-        self.s2vData = None
+        self.s2vData = None#self.runs2v()
     @property
     def graph(self):
         return self._graph
@@ -46,21 +49,26 @@ class Graph(object):
     def load(self,filename):
         pass
     
-    def s2v(self,maxsize = None):
+    def runs2v(self,maxsize = None):
         if TEST:
             time.sleep(np.random.random())
             if not maxsize:
                 maxsize = self.n
-            return np.random.random([maxsize,self.s2vlength])
-        if isinstance(self.s2vData,type(None)):
-            self.s2vData = s2v(self.edges,self.s2vlength)
+            self.s2vData = np.random.random([maxsize,self.s2vlength])
+            return 
         if not maxsize:
-            return self.s2vData
+            self.s2vData = s2v(self.edges,self.s2vlength)
         else:
             assert maxsize >= self.n
-            r = np.zeros([maxsize,self.s2vlength])
-            r[:self.n,:] = self.s2vData
-            return r
+            self.s2vData = np.zeros([maxsize,self.s2vlength])
+            self.s2vData[:self.n,:] = s2v(self.edges,self.s2vlength)
+
+            
+    def s2v(self,maxsize=None):
+        if maxsize:
+            if maxsize!=self.s2vData.shape[0]:
+                raise ValueError('In this Version, maxsize must is runs2v size')
+        return self.s2vData
     
     @property
     def edges(self):
