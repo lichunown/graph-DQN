@@ -12,7 +12,7 @@ if not os.path.exists('models/'):
 
 
 MAXE = 20
-GRAN = 50
+GRAN = 50 
 agent = DQN(MAXN = 50,s2vlength=100)
 
 try:
