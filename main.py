@@ -65,7 +65,7 @@ def envWorker(processi,inputqueue,outputqueue,s2vlock):
 if __name__ == '__main__':
     results = []
     cmds = []
-    envprocessnum = 3#cpu_count() // 2
+    envprocessnum = cpu_count() // 2
     s2vlock = Lock()
     for i in range(envprocessnum):
         results.append(Queue())
