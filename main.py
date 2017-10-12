@@ -18,7 +18,8 @@ M = 2
 selectnum = 5
 s2vlength = 100
 GRAPHRANGE = 50
-LOADWEIGHT = True
+
+LOADWEIGHT = False
 
 
 def modifyReward(lastr,reward): # use delta reward as the indicator of this step
@@ -47,7 +48,6 @@ def envWorker(processi,inputqueue,outputqueue,s2vlock):
                 outputqueue.put(('act',(state,epsilon)))
                 print('[Process-{}] get'.format(processi))
                 action = inputqueue.get()
-    
                 state,action_onehot,reward,next_state,done = env.act(action)
                 reward = modifyReward(lastreward,reward)
                 print('[Process-{}] put remember'.format(processi))
@@ -76,6 +76,7 @@ if __name__ == '__main__':
         
     agent = DQN(MAXN = MAXN, s2vlength = s2vlength)
     remembertimes = 0
+    traintimes = 0
     if LOADWEIGHT:
         try:
             agent.loadWeight()
@@ -100,6 +101,9 @@ if __name__ == '__main__':
                     if remembertimes >= 16:
                         remembertimes = 0
                         agent.train()
+                        traintimes += 1
+                        if traintimes >= 10:
+                            agent.saveWeight()
                         print('[main] agent Train epslion: {}'.format(agent.epsilon))
             
     
