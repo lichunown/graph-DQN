@@ -52,11 +52,11 @@ class DQN(object):
         gm.add(MaxPooling1D(pool_length=2, border_mode="valid"))
         gm.add(Dropout(0.3))
         gm.add(Flatten())
-        gm.summary()
+#        gm.summary()
         sm = Sequential()
         sm.add(Dense(128, input_shape=(self.MAXN,),activation="relu"))
         sm.add(Dense(256,activation="relu"))
-        sm.summary()
+#        sm.summary()
         _model = Sequential()
         _model.add(Merge([sm, gm], mode="concat", concat_axis=-1))
         _model.add(Dense(256,activation="relu"))
@@ -64,7 +64,7 @@ class DQN(object):
         _model.add(Dense(512,activation="linear"))
         _model.add(Dense(self.MAXN, activation="linear"))
         _model.compile(optimizer="RMSprop", loss='mse') # TODO change
-        _model.summary()
+#        _model.summary()
         '''
         gm = Sequential()
         gm.add(Flatten(input_shape=(self.MAXN,self.MAXN)))
@@ -135,8 +135,10 @@ class DQN(object):
 #            print('[Warning] Best reward of selection is 0.')
         return action
     
-    def act(self,state):# 执行的动作，具有随机性
-        if random.random() < self.epsilon:
+    def act(self,state,epsilon = None):# 执行的动作，具有随机性
+        if not epsilon:
+            epsilon = self.epsilon
+        if random.random() < epsilon:
             return random.sample(list(np.where(state[0]==0)[0]),1)[0]
         else:
             return self.predict_action(state)
