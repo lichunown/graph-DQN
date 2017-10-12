@@ -11,7 +11,7 @@ from DQN import DQN
 if not os.path.exists('models/'):
     os.mkdir('models')
 
-
+# args:
 N = 20
 MAXN = 50
 M = 2
@@ -21,11 +21,9 @@ GRAPHRANGE = 50
 LOADWEIGHT = True
 
 
-
-
-
-def modifyReward(lastr,reward):
+def modifyReward(lastr,reward): # use delta reward as the indicator of this step
     return reward - lastr
+
 
 def envWorker(processi,inputqueue,outputqueue):
     print('[run] envWorker Process-%d'%processi)
@@ -60,7 +58,7 @@ def envWorker(processi,inputqueue,outputqueue):
 if __name__ == '__main__':
     results = []
     cmds = []
-    envprocessnum = 3#cpu_count() // 2
+    envprocessnum = cpu_count() // 2
     for i in range(envprocessnum):
         results.append(Queue())
         cmds.append(Queue())

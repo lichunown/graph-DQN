@@ -7,7 +7,7 @@ import networkx as nx
 from s2v import s2v
 import time
 
-TEST = True
+TEST = False
 
 class Graph(object):
     def __init__(self,n = 10,m = 2,s2vlength = 100):
