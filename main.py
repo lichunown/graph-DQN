@@ -27,32 +27,36 @@ def modifyReward(lastr,reward): # use delta reward as the indicator of this step
 
 def envWorker(processi,inputqueue,outputqueue,s2vlock):
     print('[run] envWorker Process-%d'%processi)
-    env = GraphEnv(n=N,m=M,s2vlength=s2vlength,maxSelectNum=selectnum,MAXN = MAXN)
-    s2vlock.acquire()  
-    try:
-        env.runs2v(maxsize = MAXN)
-    finally:
-        s2vlock.release()
-    for g in range(GRAPHRANGE):
-        lastreward = 0
-        state = env.reset()
-        epsilon = None
-        while True:
-#            action = agent.act(state)
-            print('[Process-{}] put act'.format(processi))
-            outputqueue.put(('act',(state,epsilon)))
-            print('[Process-{}] get'.format(processi))
-            action = inputqueue.get()
-
-            state,action_onehot,reward,next_state,done = env.act(action)
-            reward = modifyReward(lastreward,reward)
-            print('[Process-{}] put remember'.format(processi))
-            outputqueue.put(('remember',(state, action_onehot, reward, next_state, done)))
-#            agent.remember(state, action_onehot, reward, next_state, done)
-            state = next_state
-            lastreward = reward
-            if done:
-                break
+    graphnum = 0
+    while True:
+        env = GraphEnv(n=N,m=M,s2vlength=s2vlength,maxSelectNum=selectnum,MAXN = MAXN)
+        graphnum += 1
+        s2vlock.acquire()  
+        try:
+            env.runs2v(maxsize = MAXN)
+            print('[Process-{}] created struct'.format(processi))
+        finally:
+            s2vlock.release()
+        for g in range(GRAPHRANGE):
+            lastreward = 0
+            state = env.reset()
+            epsilon = None
+            while True:
+    #            action = agent.act(state)
+                print('[Process-{}] put act'.format(processi))
+                outputqueue.put(('act',(state,epsilon)))
+                print('[Process-{}] get'.format(processi))
+                action = inputqueue.get()
+    
+                state,action_onehot,reward,next_state,done = env.act(action)
+                reward = modifyReward(lastreward,reward)
+                print('[Process-{}] put remember'.format(processi))
+                outputqueue.put(('remember',(state, action_onehot, reward, next_state, done)))
+    #            agent.remember(state, action_onehot, reward, next_state, done)
+                state = next_state
+                lastreward = reward
+                if done:
+                    break
 
 
 
