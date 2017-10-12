@@ -5,6 +5,9 @@ import random
 #from scipy.special import comb
 import networkx as nx
 from s2v import s2v
+import time
+
+TEST = True
 
 class Graph(object):
     def __init__(self,n = 10,m = 2,s2vlength = 100):
@@ -44,6 +47,11 @@ class Graph(object):
         pass
     
     def s2v(self,maxsize = None):
+        if TEST:
+            time.sleep(np.random.random())
+            if not maxsize:
+                maxsize = self.n
+            return np.random.random([maxsize,self.s2vlength])
         if isinstance(self.s2vData,type(None)):
             self.s2vData = s2v(self.edges,self.s2vlength)
         if not maxsize:

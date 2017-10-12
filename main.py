@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from multiprocessing import cpu_count,Queue,Process
 import numpy as np
 import os
-
+from queue import Empty
 from env import GraphEnv
 from DQN import DQN
 
@@ -11,40 +12,88 @@ if not os.path.exists('models/'):
     os.mkdir('models')
 
 
-MAXE = 20
-GRAN = 50
-agent = DQN(MAXN = 50,s2vlength=100)
+N = 20
+MAXN = 50
+M = 2
+selectnum = 5
+s2vlength = 100
+GRAPHRANGE = 50
+LOADWEIGHT = True
 
-try:
-    agent.loadWeight()
-except Exception:
-    pass
 
-for gtimes in range(GRAN):
-    env = GraphEnv(n=20,m=2,s2vlength=100,maxSelectNum=5,MAXN = 50)
-    for e in range(MAXE):
-        state = env.reset()
-        times = 0
+
+
+
+def modifyReward(lastr,reward):
+    return reward - lastr
+
+def envWorker(processi,inputqueue,outputqueue):
+    print('[run] envWorker Process-%d'%processi)
+    env = GraphEnv(n=N,m=M,s2vlength=s2vlength,maxSelectNum=selectnum,MAXN = MAXN)
+    for g in range(GRAPHRANGE):
         lastreward = 0
+        state = env.reset()
+        epsilon = None
         while True:
-            times += 1 
-            action = agent.act(state)
+#            action = agent.act(state)
+            print('[Process-{}] put act'.format(processi))
+            outputqueue.put(('act',(state,epsilon)))
+            print('[Process-{}] get'.format(processi))
+            action = inputqueue.get()
+
             state,action_onehot,reward,next_state,done = env.act(action)
-            if lastreward==0:
-                reward = reward/10
-            else:
-                reward = reward - lastreward
-            agent.remember(state, action_onehot, reward, next_state, done)
+            reward = modifyReward(lastreward,reward)
+            print('[Process-{}] put remember'.format(processi))
+            outputqueue.put(('remember',(state, action_onehot, reward, next_state, done)))
+#            agent.remember(state, action_onehot, reward, next_state, done)
             state = next_state
-            lastreward = reward # TODO hhh
-            agent.train()
-#            print("g:{}/{} e:{}/{}  times:{}  reward:{:.2}  epsilon:{:.2}  predict:{:.2}".format(gtimes,GRAN,e,MAXE,
-#                                                  times,reward,agent.epsilon,
-#                                                  agent.predict_action_value(state)))
+            lastreward = reward
             if done:
-                print("g:{}/{} e:{}/{}  times:{}  reward:{}  epsilon:{:.2}  predict:{:.2}".format(gtimes,GRAN,e,MAXE,
-                                                  times,reward,agent.epsilon,
-                                                  agent.predict_action_value(state)))
                 break
-    agent.saveWeight()
+
+
+
+
+
+
+
+if __name__ == '__main__':
+    results = []
+    cmds = []
+    envprocessnum = 3#cpu_count() // 2
+    for i in range(envprocessnum):
+        results.append(Queue())
+        cmds.append(Queue())
+        p = Process(target=envWorker, args=(i,results[i],cmds[i]))
+        p.start()
+        
+    agent = DQN(MAXN = MAXN, s2vlength = s2vlength)
+    if LOADWEIGHT:
+        try:
+            agent.loadWeight()
+        except Exception:
+            pass   
+        
+    while True:
+        for i in range(envprocessnum):
+            try:
+                cmd = cmds[i].get_nowait()
+            except Empty:
+                cmd = None
+                pass
+            if cmd:
+                print('[main] #for {}# get cmd: {}'.format(i,cmd[0]))
+                if cmd[0]=='act':
+                    print('[main] #for {}# put act'.format(i))
+                    results[i].put(agent.act(cmd[1][0],cmd[1][1]))
+                elif cmd[0]=='remember':
+                    agent.remember(cmd[1][0],cmd[1][1],cmd[1][2],cmd[1][3],cmd[1][4])
+            
     
+    
+    
+    
+    
+    
+    
+
