@@ -88,19 +88,30 @@ class DQN(object):
     def _findMaxIndex(self,r,info):
         return np.where(r*info!=0)[0][np.argmax((r*info)[np.where(r*info!=0)])]
     
+    def yieldTrainData(self):
+        while True:
+            state,action_onehot,reward,next_state,done = random.sample(self.memory,1)[0]
+            target = reward if done else (reward + self.gamma * self.predict_action_value(next_state))             
+            target_f = self.predict_action_onehot(state)
+            action = np.argmax(action_onehot)
+            target_f[action] = target              
+#            print(self.reshapeState(state), target_f.reshape([1,len(target_f)]))
+            yield [self.reshapeState(state), target_f.reshape([1,len(target_f)])]
     def train(self):# TODO
         if len(self.memory)>=self.train_batch:
-            minibatch = random.sample(self.memory,self.train_batch) 
-            for state,action_onehot,reward,next_state,done in minibatch:
-                target = reward if done else (reward + self.gamma * self.predict_action_value(next_state))             
-                target_f = self.predict_action_onehot(state)
-                action = np.argmax(action_onehot)
-                target_f[action] = target    
-#                print("train  reward:{} target:{}".format(reward,target))
-#                print(target_f)
-                self.model.fit(self.reshapeState(state), target_f.reshape([1,len(target_f)]), epochs=2, verbose=0)
-#                print(self.predict_action_onehot(state))
-#                print("trained  predict:{} pre_action:{}".format(self.predict_action_value(state),self.predict_action_onehot(state)[action]))
+            self.model.fit_generator(self.yieldTrainData(),samples_per_epoch=32,nb_epoch=2,verbose=1)
+#        if len(self.memory)>=self.train_batch:
+#            minibatch = random.sample(self.memory,self.train_batch) 
+#            for state,action_onehot,reward,next_state,done in minibatch:
+#                target = reward if done else (reward + self.gamma * self.predict_action_value(next_state))             
+#                target_f = self.predict_action_onehot(state)
+#                action = np.argmax(action_onehot)
+#                target_f[action] = target    
+##                print("train  reward:{} target:{}".format(reward,target))
+##                print(target_f)
+#                self.model.fit(self.reshapeState(state), target_f.reshape([1,len(target_f)]), epochs=2, verbose=0)
+##                print(self.predict_action_onehot(state))
+##                print("trained  predict:{} pre_action:{}".format(self.predict_action_value(state),self.predict_action_onehot(state)[action]))
 
             self.epsilondecay()
 

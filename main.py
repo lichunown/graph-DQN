@@ -44,13 +44,13 @@ def envWorker(processi,inputqueue,outputqueue,s2vlock):
             epsilon = None
             while True:
     #            action = agent.act(state)
-                print('[Process-{}] put act'.format(processi))
+#                print('[Process-{}] put act'.format(processi))
                 outputqueue.put(('act',(state,epsilon)))
-                print('[Process-{}] get'.format(processi))
+#                print('[Process-{}] get'.format(processi))
                 action = inputqueue.get()
                 state,action_onehot,reward,next_state,done = env.act(action)
                 reward = modifyReward(lastreward,reward)
-                print('[Process-{}] put remember'.format(processi))
+#                print('[Process-{}] put remember'.format(processi))
                 outputqueue.put(('remember',(state, action_onehot, reward, next_state, done)))
     #            agent.remember(state, action_onehot, reward, next_state, done)
                 state = next_state
@@ -91,9 +91,9 @@ if __name__ == '__main__':
                 cmd = None
                 pass
             if cmd:
-                print('[main] #for {}# get cmd: {}'.format(i,cmd[0]))
+#                print('[main] #for {}# get cmd: {}'.format(i,cmd[0]))
                 if cmd[0]=='act':
-                    print('[main] #for {}# put act'.format(i))
+#                    print('[main] #for {}# put act'.format(i))
                     results[i].put(agent.act(cmd[1][0],cmd[1][1]))
                 elif cmd[0]=='remember':
                     agent.remember(cmd[1][0],cmd[1][1],cmd[1][2],cmd[1][3],cmd[1][4])
